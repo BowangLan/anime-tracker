@@ -9,6 +9,7 @@ import {
   Clapperboard,
   Timer,
   Layers,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import type { AiringAnime, Weekday } from "@/lib/anilist";
@@ -43,7 +44,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
   const following = useFollows((s) => s.following);
 
   const [query, setQuery] = useState("");
-  const [onlyFollowing, setOnlyFollowing] = useState(false);
+  const [onlyFollowing, setOnlyFollowing] = useState(true);
   const columnRefs = useRef<Map<Weekday, HTMLElement | null>>(new Map());
 
   // Derive airing info + group by weekday. All time-based, so it waits for the
@@ -144,18 +145,11 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
           })}
         </nav>
 
-        <button
-          onClick={() => setOnlyFollowing((v) => !v)}
-          className={cn(
-            "mt-6 inline-flex items-center gap-2 rounded-[8px] px-2.5 py-2 text-[13px] font-medium transition",
-            onlyFollowing
-              ? "bg-[var(--fr-surface-2)] text-[var(--fr-ink)]"
-              : "text-[var(--fr-ink-muted)] hover:text-[var(--fr-ink)]",
-          )}
-        >
-          <Star className={cn("h-4 w-4", onlyFollowing && "fill-current")} />
-          Following only
-        </button>
+        <FavoritesSwitch
+          checked={onlyFollowing}
+          onCheckedChange={setOnlyFollowing}
+          className="mt-6"
+        />
 
         <p className="mt-auto px-1 pt-6 text-[11px] leading-relaxed text-[var(--fr-ink-muted)]">
           Live schedule via the{" "}
@@ -189,21 +183,25 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search titles, studios, genres…"
-              className="w-full rounded-full border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] py-2 pl-9 pr-4 text-[13px] text-[var(--fr-ink)] outline-none placeholder:text-[var(--fr-ink-muted)] focus:ring-2 focus:ring-[var(--fr-accent-blue)]/40"
+              className="w-full rounded-full border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] py-2 pl-9 pr-9 text-[13px] text-[var(--fr-ink)] outline-none placeholder:text-[var(--fr-ink-muted)] focus:ring-2 focus:ring-[var(--fr-accent-blue)]/40"
             />
-          </div>
-          <button
-            onClick={() => setOnlyFollowing((v) => !v)}
-            aria-label="Toggle following filter"
-            className={cn(
-              "grid h-9 w-9 shrink-0 place-items-center rounded-full transition lg:hidden",
-              onlyFollowing
-                ? "bg-[var(--fr-surface-2)] text-[var(--fr-ink)]"
-                : "bg-[var(--fr-surface-1)] text-[var(--fr-ink-muted)]",
+            {isSearching && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-[var(--fr-ink-muted)] transition hover:bg-white/10 hover:text-[var(--fr-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
             )}
-          >
-            <Star className={cn("h-4 w-4", onlyFollowing && "fill-current")} />
-          </button>
+          </div>
+          <FavoritesSwitch
+            checked={onlyFollowing}
+            onCheckedChange={setOnlyFollowing}
+            compact
+            className="lg:hidden"
+          />
         </header>
 
         {model == null ? (
@@ -236,7 +234,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
               />
               <Stat
                 icon={<Star className="h-4 w-4" />}
-                label="Following"
+                label="Favorites"
                 value={model.followingCount}
               />
             </div>
@@ -322,6 +320,58 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
         )}
       </main>
     </div>
+  );
+}
+
+function FavoritesSwitch({
+  checked,
+  onCheckedChange,
+  compact = false,
+  className,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  compact?: boolean;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={compact ? "Show favorites only" : undefined}
+      onClick={() => onCheckedChange(!checked)}
+      className={cn(
+        "flex shrink-0 items-center rounded-[8px] text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60",
+        compact
+          ? "px-0.5 py-2"
+          : "w-full justify-between px-2.5 py-2 text-[var(--fr-ink)] hover:bg-white/[0.04]",
+        className,
+      )}
+    >
+      {!compact && (
+        <span className="inline-flex items-center gap-2">
+          <Star className={cn("h-4 w-4", checked && "fill-current")} />
+          Favorites only
+        </span>
+      )}
+      <span
+        aria-hidden="true"
+        className={cn(
+          "relative inline-block h-5 w-9 rounded-full border transition-colors",
+          checked
+            ? "border-[var(--fr-accent-blue)] bg-[var(--fr-accent-blue)]"
+            : "border-[var(--fr-hairline)] bg-[var(--fr-surface-2)]",
+        )}
+      >
+        <span
+          className={cn(
+            "absolute left-0 top-0.5 h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform",
+            checked ? "translate-x-[17px]" : "translate-x-0.5",
+          )}
+        />
+      </span>
+    </button>
   );
 }
 
@@ -431,17 +481,17 @@ function EmptyState({
         <p className="text-[15px] font-medium text-[var(--fr-ink)]">
           {hasQuery
             ? onlyFollowing
-              ? "No followed shows match your search"
+              ? "No favorites match your search"
               : "No shows match your search"
             : onlyFollowing
-              ? "You're not following any airing shows yet"
+              ? "You don't have any airing favorites yet"
               : "Nothing airing right now"}
         </p>
         <p className="mt-1 text-[13px] text-[var(--fr-ink-muted)]">
           {hasQuery
             ? "Try a different title, studio, or genre."
             : onlyFollowing
-              ? "Tap the star on any show to add it here."
+              ? "Turn off Favorites only to browse and add some."
               : "Try a different title, studio, or genre."}
         </p>
       </div>
