@@ -1,6 +1,6 @@
 import { Search, Star, Tv } from "lucide-react";
 
-export default function Loading() {
+export default function DashboardLoading() {
   return (
     <div className="flex min-h-screen bg-[var(--fr-canvas)]" aria-label="Loading airing schedule">
       <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-[var(--fr-hairline-soft)] bg-[var(--fr-surface-1)]/40 p-4 lg:flex">

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { fetchAiringAnime } from "@/lib/anilist";
 import { Dashboard } from "@/components/dashboard";
-import Loading from "./loading";
+import DashboardLoading from "@/components/dashboard-loading";
 
 // Statically generate and refresh hourly — airing schedules are stable within
 // an hour, and this keeps us well inside AniList's rate limits.
@@ -15,7 +15,7 @@ export default async function Home() {
     return <LoadError />;
   }
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<DashboardLoading />}>
       <Dashboard anime={anime} />
     </Suspense>
   );
