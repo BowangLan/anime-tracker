@@ -111,8 +111,8 @@ interface RawMedia {
   airingSchedule: { nodes: { episode: number; airingAt: number }[] };
 }
 
-/** Strip AniList's HTML description down to a plain, trimmed sentence or two. */
-function plainText(html: string | null): string {
+/** Strip AniList's HTML description down to readable plain text. */
+export function plainText(html: string | null): string {
   if (!html) return "";
   return html
     .replace(/<br\s*\/?>/gi, " ")
@@ -124,6 +124,305 @@ function plainText(html: string | null): string {
     .replace(/\(Source:[\s\S]*?\)/gi, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+export interface AniDate {
+  year: number | null;
+  month: number | null;
+  day: number | null;
+}
+
+interface PageInfo {
+  total: number | null;
+  perPage: number | null;
+  currentPage: number | null;
+  lastPage: number | null;
+  hasNextPage: boolean;
+}
+
+interface PersonName {
+  first: string | null;
+  middle: string | null;
+  last: string | null;
+  full: string;
+  native: string | null;
+  userPreferred: string;
+}
+
+interface PersonImage {
+  large: string;
+  medium: string;
+}
+
+export interface AnimeDetail {
+  id: number;
+  idMal: number | null;
+  title: {
+    romaji: string | null;
+    english: string | null;
+    native: string | null;
+    userPreferred: string;
+  };
+  type: string;
+  format: string | null;
+  status: string | null;
+  description: string | null;
+  startDate: AniDate;
+  endDate: AniDate;
+  season: string | null;
+  seasonYear: number | null;
+  seasonInt: number | null;
+  episodes: number | null;
+  duration: number | null;
+  chapters: number | null;
+  volumes: number | null;
+  countryOfOrigin: string | null;
+  isLicensed: boolean;
+  source: string | null;
+  hashtag: string | null;
+  trailer: { id: string; site: string; thumbnail: string | null } | null;
+  updatedAt: number;
+  coverImage: {
+    extraLarge: string;
+    large: string;
+    medium: string;
+    color: string | null;
+  };
+  bannerImage: string | null;
+  genres: string[];
+  synonyms: string[];
+  averageScore: number | null;
+  meanScore: number | null;
+  popularity: number;
+  isLocked: boolean;
+  trending: number;
+  favourites: number;
+  tags: {
+    id: number;
+    name: string;
+    description: string;
+    category: string;
+    rank: number;
+    isGeneralSpoiler: boolean;
+    isMediaSpoiler: boolean;
+    isAdult: boolean;
+    userId: number | null;
+  }[];
+  relations: {
+    edges: {
+      id: number;
+      relationType: string;
+      node: {
+        id: number;
+        idMal: number | null;
+        title: AnimeDetail["title"];
+        type: string;
+        format: string | null;
+        status: string | null;
+        siteUrl: string;
+      };
+    }[];
+    pageInfo: PageInfo;
+  };
+  characters: {
+    edges: {
+      id: number;
+      role: string;
+      name: string | null;
+      node: { id: number; name: PersonName; image: PersonImage; siteUrl: string };
+      voiceActors: {
+        id: number;
+        name: PersonName;
+        languageV2: string | null;
+        image: PersonImage;
+        siteUrl: string;
+      }[];
+    }[];
+    pageInfo: PageInfo;
+  };
+  staff: {
+    edges: {
+      id: number;
+      role: string;
+      node: {
+        id: number;
+        name: PersonName;
+        languageV2: string | null;
+        image: PersonImage;
+        description: string | null;
+        primaryOccupations: string[];
+        gender: string | null;
+        dateOfBirth: AniDate;
+        dateOfDeath: AniDate;
+        age: number | null;
+        yearsActive: number[];
+        homeTown: string | null;
+        bloodType: string | null;
+        siteUrl: string;
+      };
+    }[];
+    pageInfo: PageInfo;
+  };
+  studios: {
+    edges: {
+      isMain: boolean;
+      node: { id: number; name: string; isAnimationStudio: boolean; siteUrl: string };
+    }[];
+    pageInfo: PageInfo;
+  };
+  isFavourite: boolean;
+  isFavouriteBlocked: boolean;
+  isAdult: boolean;
+  nextAiringEpisode: {
+    id: number;
+    airingAt: number;
+    timeUntilAiring: number;
+    episode: number;
+    mediaId: number;
+  } | null;
+  airingSchedule: {
+    nodes: { id: number; airingAt: number; timeUntilAiring: number; episode: number; mediaId: number }[];
+    pageInfo: PageInfo;
+  };
+  trends: {
+    nodes: {
+      mediaId: number;
+      date: number;
+      trending: number;
+      averageScore: number | null;
+      popularity: number;
+      inProgress: number;
+      releasing: boolean;
+      episode: number | null;
+    }[];
+    pageInfo: PageInfo;
+  };
+  externalLinks: AnimeExternalLink[];
+  streamingEpisodes: { title: string; thumbnail: string | null; url: string; site: string }[];
+  rankings: {
+    id: number;
+    rank: number;
+    type: string;
+    format: string;
+    year: number | null;
+    season: string | null;
+    allTime: boolean;
+    context: string;
+  }[];
+  mediaListEntry: {
+    id: number;
+    userId: number;
+    mediaId: number;
+    status: string;
+    score: number;
+    progress: number;
+    progressVolumes: number | null;
+    repeat: number;
+    priority: number;
+    private: boolean;
+    notes: string | null;
+    hiddenFromStatusLists: boolean;
+    customLists: Record<string, boolean> | null;
+    advancedScores: Record<string, number> | null;
+    startedAt: AniDate;
+    completedAt: AniDate;
+    updatedAt: number;
+    createdAt: number;
+  } | null;
+  reviews: {
+    nodes: {
+      id: number;
+      userId: number;
+      mediaId: number;
+      mediaType: string;
+      summary: string;
+      body: string;
+      rating: number;
+      ratingAmount: number;
+      score: number;
+      private: boolean;
+      siteUrl: string;
+      createdAt: number;
+      updatedAt: number;
+      user: { id: number; name: string; siteUrl: string };
+    }[];
+    pageInfo: PageInfo;
+  };
+  recommendations: {
+    nodes: {
+      id: number;
+      rating: number;
+      userRating: string;
+      mediaRecommendation: {
+        id: number;
+        idMal: number | null;
+        title: AnimeDetail["title"];
+        type: string;
+        format: string | null;
+        status: string | null;
+        siteUrl: string;
+      } | null;
+      user: { id: number; name: string; siteUrl: string };
+    }[];
+    pageInfo: PageInfo;
+  };
+  stats: {
+    scoreDistribution: { score: number; amount: number }[];
+    statusDistribution: { status: string; amount: number }[];
+  } | null;
+  siteUrl: string;
+  autoCreateForumThread: boolean;
+  isRecommendationBlocked: boolean;
+  isReviewBlocked: boolean;
+  modNotes: string | null;
+}
+
+const DETAIL_QUERY = /* GraphQL */ `
+  query AllMediaFields($id: Int!) {
+    Media(id: $id, type: ANIME) {
+      id idMal title { romaji english native userPreferred } type format status
+      description(asHtml: false) startDate { year month day } endDate { year month day }
+      season seasonYear seasonInt episodes duration chapters volumes countryOfOrigin
+      isLicensed source hashtag trailer { id site thumbnail } updatedAt
+      coverImage { extraLarge large medium color } bannerImage genres synonyms averageScore
+      meanScore popularity isLocked trending favourites
+      tags { id name description category rank isGeneralSpoiler isMediaSpoiler isAdult userId }
+      relations { edges { id relationType node { id idMal title { romaji english native userPreferred } type format status siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      characters { edges { id role name node { id name { first middle last full native userPreferred } image { large medium } siteUrl } voiceActors { id name { first middle last full native userPreferred } languageV2 image { large medium } siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      staff { edges { id role node { id name { first middle last full native userPreferred } languageV2 image { large medium } description(asHtml: false) primaryOccupations gender dateOfBirth { year month day } dateOfDeath { year month day } age yearsActive homeTown bloodType siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      studios { edges { isMain node { id name isAnimationStudio siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      isFavourite isFavouriteBlocked isAdult nextAiringEpisode { id airingAt timeUntilAiring episode mediaId }
+      airingSchedule(perPage: 50) { nodes { id airingAt timeUntilAiring episode mediaId } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      trends { nodes { mediaId date trending averageScore popularity inProgress releasing episode } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      externalLinks { id url site siteId type language color icon notes isDisabled }
+      streamingEpisodes { title thumbnail url site }
+      rankings { id rank type format year season allTime context }
+      mediaListEntry { id userId mediaId status score progress progressVolumes repeat priority private notes hiddenFromStatusLists customLists advancedScores startedAt { year month day } completedAt { year month day } updatedAt createdAt }
+      reviews { nodes { id userId mediaId mediaType summary body rating ratingAmount score private siteUrl createdAt updatedAt user { id name siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      recommendations { nodes { id rating userRating mediaRecommendation { id idMal title { romaji english native userPreferred } type format status siteUrl } user { id name siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      stats { scoreDistribution { score amount } statusDistribution { status amount } }
+      siteUrl autoCreateForumThread isRecommendationBlocked isReviewBlocked modNotes
+    }
+  }
+`;
+
+/** Fetch AniList's complete public media detail payload for one anime. */
+export async function fetchAnimeDetail(id: number): Promise<AnimeDetail | null> {
+  const res = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ query: DETAIL_QUERY, variables: { id } }),
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) throw new Error(`AniList request failed: ${res.status} ${res.statusText}`);
+
+  const json = (await res.json()) as {
+    data?: { Media: AnimeDetail | null };
+    errors?: { message: string }[];
+  };
+  if (json.errors?.length) throw new Error(json.errors[0].message);
+  return json.data?.Media ?? null;
 }
 
 function normalize(m: RawMedia): AiringAnime {

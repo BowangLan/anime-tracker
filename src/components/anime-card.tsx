@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Menu } from "@base-ui/react/menu";
 import { Star, Clock, ExternalLink as ExternalLinkIcon } from "lucide-react";
 import type { AiringAnime, AnimeExternalLink } from "@/lib/anilist";
@@ -35,10 +36,8 @@ export function AnimeCard({
     <article
       className="group relative flex gap-3 rounded-[14px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] p-2.5 transition-colors hover:border-white/15 hover:bg-[var(--fr-surface-2)]/60"
     >
-      <a
-        href={anime.siteUrl}
-        target="_blank"
-        rel="noreferrer"
+      <Link
+        href={`/anime/${anime.id}`}
         className="relative aspect-[2/3] w-[54px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--fr-surface-2)]"
       >
         {anime.coverImage && (
@@ -50,18 +49,14 @@ export function AnimeCard({
             className="object-cover"
           />
         )}
-      </a>
+      </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-start gap-1.5">
-          <h3
-            className="line-clamp-2 flex-1 text-[13px] font-semibold leading-tight text-[var(--fr-ink)]"
-            style={{ letterSpacing: "-0.01em" }}
-            title={anime.title}
-          >
-            {anime.title}
+          <h3 className="line-clamp-2 flex-1 text-[13px] font-semibold leading-tight text-[var(--fr-ink)]" style={{ letterSpacing: "-0.01em" }} title={anime.title}>
+            <Link href={`/anime/${anime.id}`} className="after:absolute after:inset-0 after:z-0 focus-visible:outline-none">{anime.title}</Link>
           </h3>
-          <div className="-mr-0.5 flex shrink-0 items-center">
+          <div className="relative z-10 -mr-0.5 flex shrink-0 items-center">
             <ExternalLinksMenu links={anime.externalLinks} />
             <button
               aria-label={following ? "Unfollow" : "Follow"}
