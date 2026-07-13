@@ -1,31 +1,32 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   Star,
   Tv,
   CalendarClock,
   Clapperboard,
-  Timer,
-  Layers,
   X,
+  Radio,
+  AlertCircle,
 } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
-import type { AiringAnime, Weekday } from "@/lib/anilist";
+import { usePathname, useSearchParams } from "next/navigation";
+import type { AiringAnime, AnimeSearchResult, Weekday } from "@/lib/anilist";
 import { WEEKDAYS } from "@/lib/anilist";
 import { deriveAiring, untilLabel, type Airing } from "@/lib/schedule";
 import { useNow } from "@/lib/use-now";
 import { useFollows } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { AnimeCard } from "@/components/anime-card";
+import { StarRating } from "@/components/star-rating";
 
 interface Entry {
   anime: AiringAnime;
   airing: Airing;
 }
-
-const DAY_MS = 86_400_000;
 
 /** Weekday values ordered so "today" comes first (the board reads forward). */
 function weekOrder(today: Weekday): Weekday[] {
@@ -42,8 +43,15 @@ function dayLabel(day: Weekday, today: Weekday): { name: string; rel?: string } 
 export function Dashboard({ anime }: { anime: AiringAnime[] }) {
   const now = useNow();
   const following = useFollows((s) => s.following);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const [query, setQuery] = useState("");
+  const query = searchParams.get("q") ?? "";
+  const [searchResponse, setSearchResponse] = useState<{
+    query: string;
+    results: AnimeSearchResult[];
+    error: string;
+  }>({ query: "", results: [], error: "" });
   const [onlyFollowing, setOnlyFollowing] = useState(true);
   const columnRefs = useRef<Map<Weekday, HTMLElement | null>>(new Map());
 
@@ -52,19 +60,11 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
   const model = useMemo(() => {
     if (now == null) return null;
     const today = new Date(now).getDay() as Weekday;
-    const q = query.trim().toLowerCase();
 
     const entries: Entry[] = anime
       .map((a) => ({ anime: a, airing: deriveAiring(a, now) }))
       .filter((e) => e.airing.weekday != null)
-      .filter((e) => (onlyFollowing && !q ? following.includes(e.anime.id) : true))
-      .filter(
-        (e) =>
-          !q ||
-          e.anime.title.toLowerCase().includes(q) ||
-          e.anime.studio.toLowerCase().includes(q) ||
-          e.anime.genres.some((g) => g.toLowerCase().includes(q)),
-      );
+      .filter((e) => (onlyFollowing ? following.includes(e.anime.id) : true));
 
     const byNext = (a: Entry, b: Entry) =>
       (a.airing.nextAiringAt ?? Infinity) - (b.airing.nextAiringAt ?? Infinity);
@@ -99,10 +99,72 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
           : "—",
       soonest: soonest ?? null,
     };
-  }, [anime, now, query, onlyFollowing, following]);
+  }, [anime, now, onlyFollowing, following]);
 
   const searchQuery = query.trim();
   const isSearching = searchQuery.length > 0;
+
+  useEffect(() => {
+    const cleanQuery = query.trim();
+    if (!cleanQuery) return;
+
+    const controller = new AbortController();
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/anime/search?q=${encodeURIComponent(cleanQuery)}`, {
+          signal: controller.signal,
+        });
+        const payload = (await response.json()) as {
+          results?: AnimeSearchResult[];
+          error?: string;
+        };
+        if (!response.ok) throw new Error(payload.error || "Search failed.");
+        setSearchResponse({ query: cleanQuery, results: payload.results ?? [], error: "" });
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setSearchResponse({
+          query: cleanQuery,
+          results: [],
+          error: error instanceof Error ? error.message : "Search failed.",
+        });
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query]);
+
+  const updateQuery = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const nextQuery = value.slice(0, 100);
+    if (nextQuery.trim()) {
+      params.set("q", nextQuery);
+    } else {
+      params.delete("q");
+    }
+    const queryString = params.toString();
+    const hash = window.location.hash;
+    window.history.replaceState(
+      null,
+      "",
+      `${queryString ? `${pathname}?${queryString}` : pathname}${hash}`,
+    );
+  };
+
+  const clearSearch = () => updateQuery("");
+
+  const searchState: "idle" | "loading" | "success" | "error" = !isSearching
+    ? "idle"
+    : searchResponse.query !== searchQuery
+      ? "loading"
+      : searchResponse.error
+        ? "error"
+        : "success";
+  const searchResults = searchResponse.query === searchQuery ? searchResponse.results : [];
+  const searchError = searchResponse.query === searchQuery ? searchResponse.error : "";
 
   const scrollToDay = (day: Weekday) =>
     columnRefs.current
@@ -181,14 +243,14 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fr-ink-muted)]" />
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search titles, studios, genres…"
+              onChange={(e) => updateQuery(e.target.value)}
+              placeholder="Search AniList’s full catalog…"
               className="w-full rounded-full border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] py-2 pl-9 pr-9 text-[13px] text-[var(--fr-ink)] outline-none placeholder:text-[var(--fr-ink-muted)] focus:ring-2 focus:ring-[var(--fr-accent-blue)]/40"
             />
             {isSearching && (
               <button
                 type="button"
-                onClick={() => setQuery("")}
+                onClick={clearSearch}
                 aria-label="Clear search"
                 className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-[var(--fr-ink-muted)] transition hover:bg-white/10 hover:text-[var(--fr-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60"
               >
@@ -208,10 +270,12 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
           <BoardSkeleton />
         ) : isSearching ? (
           <SearchResults
-            entries={model.results}
+            results={searchResults}
             query={searchQuery}
             now={now!}
-            onClear={() => setQuery("")}
+            state={searchState}
+            error={searchError}
+            onClear={clearSearch}
           />
         ) : (
           <div className="flex min-w-0 flex-col gap-6 p-5">
@@ -255,14 +319,14 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
                   hasQuery={query.trim().length > 0}
                   onClear={() => {
                     setOnlyFollowing(false);
-                    setQuery("");
+                    clearSearch();
                   }}
                 />
               ) : (
                 <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2 pt-3">
                   {model.order.map((day) => {
                     const entries = model.byDay.get(day) ?? [];
-                    const { name, rel } = dayLabel(day, model.today);
+                    const { name } = dayLabel(day, model.today);
                     const isToday = day === model.today;
                     return (
                       <section
@@ -372,18 +436,24 @@ function FavoritesSwitch({
 }
 
 function SearchResults({
-  entries,
+  results,
   query,
   now,
+  state,
+  error,
   onClear,
 }: {
-  entries: Entry[];
+  results: AnimeSearchResult[];
   query: string;
   now: number;
+  state: "idle" | "loading" | "success" | "error";
+  error: string;
   onClear: () => void;
 }) {
+  const releasingCount = results.filter((anime) => anime.status === "RELEASING").length;
+
   return (
-    <section className="p-5">
+    <section className="p-5" aria-live="polite" aria-busy={state === "loading"}>
       <div className="mb-5 flex items-end justify-between gap-4 border-b border-[var(--fr-hairline-soft)] pb-4">
         <div className="min-w-0">
           <p className="fr-eyebrow">Search results</p>
@@ -395,26 +465,102 @@ function SearchResults({
           </h2>
         </div>
         <p className="shrink-0 pb-0.5 text-[12px] tabular-nums text-[var(--fr-ink-muted)]">
-          {entries.length} {entries.length === 1 ? "show" : "shows"}
+          {state === "loading"
+            ? "Searching AniList…"
+            : `${results.length} ${results.length === 1 ? "show" : "shows"}`}
         </p>
       </div>
 
-      {entries.length === 0 ? (
+      {state === "loading" ? (
+        <SearchResultsSkeleton />
+      ) : state === "error" ? (
+        <div className="flex flex-col items-center justify-center gap-3 rounded-[16px] border border-dashed border-[var(--fr-hairline)] py-20 text-center">
+          <AlertCircle className="h-6 w-6 text-[var(--fr-gradient-coral)]" />
+          <p className="text-[14px] font-medium text-[var(--fr-ink)]">Couldn&apos;t search AniList</p>
+          <p className="max-w-sm text-[13px] text-[var(--fr-ink-muted)]">{error}</p>
+        </div>
+      ) : results.length === 0 ? (
         <EmptyState onlyFollowing={false} hasQuery onClear={onClear} />
       ) : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {entries.map((entry) => (
-            <AnimeCard
-              key={entry.anime.id}
-              anime={entry.anime}
-              airing={entry.airing}
-              now={now}
-            />
-          ))}
-        </div>
+        <>
+          {releasingCount > 0 && (
+            <div className="mb-3 flex items-center gap-2 text-[11px] font-medium text-[var(--fr-accent-blue)]">
+              <Radio className="h-3.5 w-3.5" />
+              Airing titles are ranked first
+            </div>
+          )}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {results.map((anime) => (
+              <SearchResultCard key={anime.id} anime={anime} now={now} />
+            ))}
+          </div>
+        </>
       )}
     </section>
   );
+}
+
+function SearchResultCard({ anime, now }: { anime: AnimeSearchResult; now: number }) {
+  const airing = deriveAiring(anime, now);
+  const isReleasing = anime.status === "RELEASING";
+  const countdown = airing.nextAiringAt ? untilLabel(airing.nextAiringAt, now) : null;
+
+  return (
+    <article className="group relative flex min-h-[128px] gap-3 rounded-[14px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] p-2.5 transition hover:border-white/15 hover:bg-[var(--fr-surface-2)]/60">
+      <Link href={`/anime/${anime.id}`} className="relative aspect-[2/3] w-[70px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--fr-surface-2)]">
+        {anime.coverImage && <Image src={anime.coverImage} alt="" fill sizes="70px" className="object-cover transition duration-300 group-hover:scale-[1.03]" />}
+      </Link>
+      <div className="flex min-w-0 flex-1 flex-col py-0.5">
+        <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.07em]">
+          {isReleasing && <span className="fr-live-dot h-1.5 w-1.5 rounded-full bg-[var(--fr-accent-blue)]" />}
+          <span className={isReleasing ? "text-[var(--fr-accent-blue)]" : "text-[var(--fr-ink-muted)]"}>
+            {isReleasing ? "Airing now" : searchLabel(anime.status)}
+          </span>
+          {anime.format && <><span className="text-white/20">/</span><span className="text-[var(--fr-ink-muted)]">{searchLabel(anime.format)}</span></>}
+        </div>
+        <h3 className="mt-1.5 line-clamp-2 text-[14px] font-semibold leading-tight tracking-[-0.015em] text-[var(--fr-ink)]">
+          <Link href={`/anime/${anime.id}`} className="after:absolute after:inset-0 focus-visible:outline-none">{anime.title}</Link>
+        </h3>
+        <p className="mt-1 truncate text-[11px] text-[var(--fr-ink-muted)]">{anime.studio}</p>
+        <div className="mt-auto flex items-center gap-2 pt-2 text-[11px] text-[var(--fr-ink-muted)]">
+          {anime.seasonYear && <span>{anime.seasonYear}</span>}
+          {anime.averageScore != null && <StarRating value={anime.averageScore} />}
+          {countdown && <span className="ml-auto tabular-nums text-[var(--fr-ink)]">EP {airing.nextEpisode} in {countdown}</span>}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function searchLabel(value: string | null): string {
+  if (!value) return "Announced";
+  return value.toLowerCase().replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function SearchResultsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      {Array.from({ length: 12 }).map((_, index) => (
+        <div key={index} className="flex min-h-[128px] gap-3 rounded-[14px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] p-2.5">
+          <Skeleton className="aspect-[2/3] w-[70px] shrink-0 rounded-[8px]" />
+          <div className="flex flex-1 flex-col py-1">
+            <Skeleton className="h-2.5 w-20 rounded-full" />
+            <Skeleton className="mt-3 h-3.5 w-[88%] rounded-full" />
+            <Skeleton className="mt-1.5 h-3.5 w-[62%] rounded-full" />
+            <Skeleton className="mt-2 h-2.5 w-24 rounded-full" />
+            <div className="mt-auto flex gap-2">
+              <Skeleton className="h-2.5 w-9 rounded-full" />
+              <Skeleton className="h-2.5 w-16 rounded-full" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={cn("animate-pulse bg-white/[0.07]", className)} />;
 }
 
 /** KPI widget. */
@@ -483,10 +629,10 @@ function EmptyState({
         </p>
         <p className="mt-1 text-[13px] text-[var(--fr-ink-muted)]">
           {hasQuery
-            ? "Try a different title, studio, or genre."
+            ? "Try another title, alternate name, or spelling."
             : onlyFollowing
               ? "Turn off Favorites only to browse and add some."
-              : "Try a different title, studio, or genre."}
+              : "Check back when the next season begins."}
         </p>
       </div>
       {(onlyFollowing || hasQuery) && (

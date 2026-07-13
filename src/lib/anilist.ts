@@ -58,6 +58,17 @@ export interface AiringAnime {
   schedule: EpisodeAiring[];
 }
 
+/** A catalog-wide AniList search result, including enough metadata to rank and
+ * render titles that are not part of the current airing schedule. */
+export interface AnimeSearchResult extends AiringAnime {
+  titleVariants: string[];
+  format: string | null;
+  status: string | null;
+  seasonYear: number | null;
+  averageScore: number | null;
+  popularity: number;
+}
+
 type Season = "WINTER" | "SPRING" | "SUMMER" | "FALL";
 
 /** Current anime season + year, from a given instant (defaults to now). */
@@ -96,6 +107,38 @@ const QUERY = /* GraphQL */ `
   }
 `;
 
+const SEARCH_QUERY = /* GraphQL */ `
+  query SearchAnime($query: String!, $page: Int) {
+    Page(page: $page, perPage: 30) {
+      pageInfo { hasNextPage }
+      media(
+        search: $query
+        type: ANIME
+        isAdult: false
+        sort: [SEARCH_MATCH, POPULARITY_DESC]
+      ) {
+        id
+        title { romaji english native userPreferred }
+        synonyms
+        format
+        status
+        seasonYear
+        averageScore
+        popularity
+        coverImage { extraLarge large color }
+        episodes
+        genres
+        siteUrl
+        externalLinks { id url site siteId type language color icon notes isDisabled }
+        description(asHtml: false)
+        studios(isMain: true) { nodes { name } }
+        nextAiringEpisode { episode airingAt }
+        airingSchedule(perPage: 50) { nodes { episode airingAt } }
+      }
+    }
+  }
+`;
+
 // Shape of the slice of the AniList response we actually read.
 interface RawMedia {
   id: number;
@@ -109,6 +152,16 @@ interface RawMedia {
   studios: { nodes: { name: string }[] };
   nextAiringEpisode: { episode: number; airingAt: number } | null;
   airingSchedule: { nodes: { episode: number; airingAt: number }[] };
+}
+
+interface RawSearchMedia extends RawMedia {
+  title: RawMedia["title"] & { native: string | null; userPreferred: string };
+  synonyms: string[];
+  format: string | null;
+  status: string | null;
+  seasonYear: number | null;
+  averageScore: number | null;
+  popularity: number;
 }
 
 /** Strip AniList's HTML description down to readable plain text. */
@@ -441,6 +494,58 @@ function normalize(m: RawMedia): AiringAnime {
     next: m.nextAiringEpisode,
     schedule,
   };
+}
+
+function normalizeSearchResult(m: RawSearchMedia): AnimeSearchResult {
+  return {
+    ...normalize(m),
+    titleVariants: [
+      m.title.english,
+      m.title.romaji,
+      m.title.native,
+      m.title.userPreferred,
+      ...m.synonyms,
+    ].filter((title): title is string => Boolean(title)),
+    format: m.format,
+    status: m.status,
+    seasonYear: m.seasonYear,
+    averageScore: m.averageScore,
+    popularity: m.popularity,
+  };
+}
+
+/** Search AniList's complete non-adult anime catalog. AniList supplies fuzzy
+ * search relevance; we apply the product rule that currently airing titles
+ * always precede other matches while retaining AniList's order inside each
+ * status group. */
+export async function searchAnime(query: string): Promise<AnimeSearchResult[]> {
+  const cleanQuery = query.trim().slice(0, 100);
+  if (!cleanQuery) return [];
+
+  const res = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ query: SEARCH_QUERY, variables: { query: cleanQuery, page: 1 } }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) throw new Error(`AniList search failed: ${res.status} ${res.statusText}`);
+
+  const json = (await res.json()) as {
+    data?: { Page?: { media: RawSearchMedia[] } };
+    errors?: { message: string }[];
+  };
+  if (json.errors?.length) throw new Error(json.errors[0].message);
+
+  return (json.data?.Page?.media ?? [])
+    .map(normalizeSearchResult)
+    .map((anime, index) => ({ anime, index }))
+    .sort(
+      (a, b) =>
+        Number(b.anime.status === "RELEASING") - Number(a.anime.status === "RELEASING") ||
+        a.index - b.index,
+    )
+    .map(({ anime }) => anime);
 }
 
 /**
