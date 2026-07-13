@@ -25,6 +25,19 @@ export interface EpisodeAiring {
   airingAt: number;
 }
 
+export interface AnimeExternalLink {
+  id: number;
+  url: string;
+  site: string;
+  siteId: number | null;
+  type: string | null;
+  language: string | null;
+  color: string | null;
+  icon: string | null;
+  notes: string | null;
+  isDisabled: boolean;
+}
+
 /** A currently-airing show, normalized from AniList for the UI. */
 export interface AiringAnime {
   id: number;
@@ -37,6 +50,8 @@ export interface AiringAnime {
   genres: string[];
   synopsis: string;
   siteUrl: string;
+  /** Official, streaming, and social links supplied by AniList. */
+  externalLinks: AnimeExternalLink[];
   /** Next episode yet to air, if any. */
   next: EpisodeAiring | null;
   /** Every episode airing AniList knows about, ascending by episode. */
@@ -71,6 +86,7 @@ const QUERY = /* GraphQL */ `
         episodes
         genres
         siteUrl
+        externalLinks { id url site siteId type language color icon notes isDisabled }
         description(asHtml: false)
         studios(isMain: true) { nodes { name } }
         nextAiringEpisode { episode airingAt }
@@ -88,6 +104,7 @@ interface RawMedia {
   episodes: number | null;
   genres: string[];
   siteUrl: string;
+  externalLinks: AnimeExternalLink[];
   description: string | null;
   studios: { nodes: { name: string }[] };
   nextAiringEpisode: { episode: number; airingAt: number } | null;
@@ -121,6 +138,7 @@ function normalize(m: RawMedia): AiringAnime {
     genres: m.genres,
     synopsis: plainText(m.description),
     siteUrl: m.siteUrl,
+    externalLinks: m.externalLinks.filter((link) => !link.isDisabled),
     next: m.nextAiringEpisode,
     schedule,
   };
