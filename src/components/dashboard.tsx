@@ -87,6 +87,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
       today,
       order,
       byDay,
+      results: [...entries].sort(byFavoriteThenNext),
       total: entries.length,
       todayCount: byDay.get(today)?.length ?? 0,
       followingCount: entries.filter((e) => following.includes(e.anime.id)).length,
@@ -98,6 +99,9 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
       soonest: soonest ?? null,
     };
   }, [anime, now, query, onlyFollowing, following]);
+
+  const searchQuery = query.trim();
+  const isSearching = searchQuery.length > 0;
 
   const scrollToDay = (day: Weekday) =>
     columnRefs.current
@@ -204,6 +208,17 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
 
         {model == null ? (
           <BoardSkeleton />
+        ) : isSearching ? (
+          <SearchResults
+            entries={model.results}
+            query={searchQuery}
+            now={now!}
+            onlyFollowing={onlyFollowing}
+            onClear={() => {
+              setQuery("");
+              setOnlyFollowing(false);
+            }}
+          />
         ) : (
           <div className="flex min-w-0 flex-col gap-6 p-5">
             {/* KPI widgets */}
@@ -310,6 +325,54 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
   );
 }
 
+function SearchResults({
+  entries,
+  query,
+  now,
+  onlyFollowing,
+  onClear,
+}: {
+  entries: Entry[];
+  query: string;
+  now: number;
+  onlyFollowing: boolean;
+  onClear: () => void;
+}) {
+  return (
+    <section className="p-5">
+      <div className="mb-5 flex items-end justify-between gap-4 border-b border-[var(--fr-hairline-soft)] pb-4">
+        <div className="min-w-0">
+          <p className="fr-eyebrow">Search results</p>
+          <h2
+            className="mt-1 truncate text-[22px] font-semibold text-[var(--fr-ink)]"
+            style={{ letterSpacing: "-0.035em" }}
+          >
+            &ldquo;{query}&rdquo;
+          </h2>
+        </div>
+        <p className="shrink-0 pb-0.5 text-[12px] tabular-nums text-[var(--fr-ink-muted)]">
+          {entries.length} {entries.length === 1 ? "show" : "shows"}
+        </p>
+      </div>
+
+      {entries.length === 0 ? (
+        <EmptyState onlyFollowing={onlyFollowing} hasQuery onClear={onClear} />
+      ) : (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {entries.map((entry) => (
+            <AnimeCard
+              key={entry.anime.id}
+              anime={entry.anime}
+              airing={entry.airing}
+              now={now}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 /** KPI widget. */
 function Stat({
   icon,
@@ -366,16 +429,20 @@ function EmptyState({
       </div>
       <div className="max-w-xs">
         <p className="text-[15px] font-medium text-[var(--fr-ink)]">
-          {onlyFollowing
-            ? "You're not following any airing shows yet"
-            : hasQuery
-              ? "No shows match your search"
+          {hasQuery
+            ? onlyFollowing
+              ? "No followed shows match your search"
+              : "No shows match your search"
+            : onlyFollowing
+              ? "You're not following any airing shows yet"
               : "Nothing airing right now"}
         </p>
         <p className="mt-1 text-[13px] text-[var(--fr-ink-muted)]">
-          {onlyFollowing
-            ? "Tap the star on any show to add it here."
-            : "Try a different title, studio, or genre."}
+          {hasQuery
+            ? "Try a different title, studio, or genre."
+            : onlyFollowing
+              ? "Tap the star on any show to add it here."
+              : "Try a different title, studio, or genre."}
         </p>
       </div>
       {(onlyFollowing || hasQuery) && (
