@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Airing — anime schedule dashboard
 
-## Getting Started
+A dashboard of currently airing anime, organized by the weekday each show
+updates on, with its latest episode number and season progress. Built to answer
+one question at a glance: _what's dropping, and when?_
 
-First, run the development server:
+The schedule is fetched live from the **AniList** GraphQL API (free, no key).
+The only thing stored locally is which shows you follow.
+
+## Stack
+
+- **Next.js 16** (App Router) + **React 19**
+- **Tailwind CSS v4** + **shadcn/ui** (Base UI under the hood)
+- **zustand** with `persist` for followed-show ids
+- Design system from `getdesign`'s **Framer** profile — see `DESIGN.md`
+- Data: [AniList GraphQL API](https://anilist.co/graphql)
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev      # http://localhost:3000
+bun run build    # production build + type check
+bun run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it's laid out
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Path | What it holds |
+| --- | --- |
+| `src/lib/anilist.ts` | AniList client: query, `AiringAnime` type, current-season logic. |
+| `src/lib/schedule.ts` | Client-side derivation: weekday, latest episode, progress, countdowns. |
+| `src/lib/store.ts` | zustand store for followed shows (persisted to `localStorage`). |
+| `src/lib/use-now.ts` | Hydration-safe, minute-ticking clock via `useSyncExternalStore`. |
+| `src/app/page.tsx` | Server Component: fetches the season, renders the dashboard. |
+| `src/components/dashboard.tsx` | The dashboard shell: sidebar, stats, 7-day board. |
+| `src/components/anime-card.tsx` | One show in a day column: cover, episode, progress. |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Design notes worth knowing
 
-## Learn More
+- **Weekday is derived from a past airing, in your timezone.** AniList gives
+  each episode's `airingAt` UNIX timestamp. `deriveAiring()` takes the most
+  recent *aired* episode and reads its weekday — so a show lands on the day it
+  actually drops for the viewer, not a fixed broadcast-country day. New shows
+  with nothing aired yet fall back to their next episode.
 
-To learn more about Next.js, take a look at the following resources:
+- **The season is always current.** `currentSeason()` maps today's date to
+  WINTER/SPRING/SUMMER/FALL, so the dashboard follows the calendar with no code
+  changes each season.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Fetched on the server, refreshed hourly.** `page.tsx` sets
+  `revalidate = 3600`; the page is statically generated and regenerated each
+  hour, keeping requests well within AniList's rate limits and off the client.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Why time-based UI waits for the client.** `useNow()` returns `null` on the
+  server and through hydration. The dashboard gates all weekday/countdown markup
+  on it, so the first client paint matches the server exactly (you briefly see a
+  skeleton), then real data fills in — no hydration mismatch, correct local time.
