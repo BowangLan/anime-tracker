@@ -57,7 +57,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
     const entries: Entry[] = anime
       .map((a) => ({ anime: a, airing: deriveAiring(a, now) }))
       .filter((e) => e.airing.weekday != null)
-      .filter((e) => (onlyFollowing ? following.includes(e.anime.id) : true))
+      .filter((e) => (onlyFollowing && !q ? following.includes(e.anime.id) : true))
       .filter(
         (e) =>
           !q ||
@@ -211,11 +211,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
             entries={model.results}
             query={searchQuery}
             now={now!}
-            onlyFollowing={onlyFollowing}
-            onClear={() => {
-              setQuery("");
-              setOnlyFollowing(false);
-            }}
+            onClear={() => setQuery("")}
           />
         ) : (
           <div className="flex min-w-0 flex-col gap-6 p-5">
@@ -379,13 +375,11 @@ function SearchResults({
   entries,
   query,
   now,
-  onlyFollowing,
   onClear,
 }: {
   entries: Entry[];
   query: string;
   now: number;
-  onlyFollowing: boolean;
   onClear: () => void;
 }) {
   return (
@@ -406,7 +400,7 @@ function SearchResults({
       </div>
 
       {entries.length === 0 ? (
-        <EmptyState onlyFollowing={onlyFollowing} hasQuery onClear={onClear} />
+        <EmptyState onlyFollowing={false} hasQuery onClear={onClear} />
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {entries.map((entry) => (
