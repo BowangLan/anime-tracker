@@ -194,4 +194,22 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  /* Live "airing now" beacon — the one moment the accent blue breathes. */
+  @keyframes fr-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+  .fr-live-dot {
+    animation: fr-pulse 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fr-live-dot {
+      animation: none;
+    }
+  }
 }

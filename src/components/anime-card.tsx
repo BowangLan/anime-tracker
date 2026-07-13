@@ -1,15 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { Star, Clock, ExternalLink } from "lucide-react";
+import { Star, Clock } from "lucide-react";
 import type { AiringAnime } from "@/lib/anilist";
 import { type Airing, untilLabel } from "@/lib/schedule";
 import { useFollows } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 /**
- * Compact schedule row for a day column: cover, title, latest episode, season
- * progress, and a countdown to the next drop.
+ * Compact schedule row for a day column: cover, title, season progress, and the
+ * countdown to the next drop. Chrome stays monochrome by design — the cover art
+ * is the only color on the board, and the accent blue is reserved for the live
+ * "airing now" beacon.
  */
 export function AnimeCard({
   anime,
@@ -26,30 +28,30 @@ export function AnimeCard({
   const total = anime.totalEpisodes;
   const countdown =
     airing.nextAiringAt != null ? untilLabel(airing.nextAiringAt, now) : null;
+  const airingNow = countdown === "now";
 
   return (
     <article
-      className="group relative flex gap-3 rounded-[14px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] p-2.5 transition-colors hover:border-white/15"
-      style={{ ["--accent" as string]: anime.color }}
+      className="group relative flex gap-3 rounded-[14px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] p-2.5 transition-colors hover:border-white/15 hover:bg-[var(--fr-surface-2)]/60"
     >
       <a
         href={anime.siteUrl}
         target="_blank"
         rel="noreferrer"
-        className="relative aspect-[2/3] w-[52px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--fr-surface-2)]"
+        className="relative aspect-[2/3] w-[54px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--fr-surface-2)]"
       >
         {anime.coverImage && (
           <Image
             src={anime.coverImage}
             alt=""
             fill
-            sizes="52px"
+            sizes="54px"
             className="object-cover"
           />
         )}
       </a>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-start gap-1.5">
           <h3
             className="line-clamp-2 flex-1 text-[13px] font-semibold leading-tight text-[var(--fr-ink)]"
@@ -62,10 +64,10 @@ export function AnimeCard({
             aria-label={following ? "Unfollow" : "Follow"}
             onClick={() => toggleFollow(anime.id)}
             className={cn(
-              "grid h-6 w-6 shrink-0 place-items-center rounded-full transition",
+              "-mr-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full transition",
               following
-                ? "text-[var(--accent)]"
-                : "text-[var(--fr-ink-muted)] hover:text-[var(--fr-ink)]",
+                ? "text-[var(--fr-ink)]"
+                : "text-[var(--fr-ink-muted)] opacity-70 hover:text-[var(--fr-ink)] hover:opacity-100",
             )}
           >
             <Star className={cn("h-3.5 w-3.5", following && "fill-current")} />
@@ -76,49 +78,46 @@ export function AnimeCard({
           {anime.studio}
         </p>
 
-        {/* Season progress */}
-        <div className="mt-auto flex items-center gap-2">
-          <span className="rounded-full bg-[var(--fr-surface-2)] px-2 py-0.5 text-[10px] font-medium tabular-nums text-[var(--fr-ink)]">
-            EP {airing.latestAired || "—"}
-            {total ? ` / ${total}` : ""}
-          </span>
-          <div className="h-1 flex-1 overflow-hidden rounded-full bg-[var(--fr-surface-2)]">
+        {/* Status line + monochrome season progress */}
+        <div className="mt-auto space-y-1.5 pt-1.5">
+          <div className="flex items-center justify-between gap-2 text-[11px]">
+            <span className="tabular-nums text-[var(--fr-ink-muted)]">
+              EP{" "}
+              <span className="font-medium text-[var(--fr-ink)]">
+                {airing.latestAired || "—"}
+              </span>
+              {total ? ` / ${total}` : ""}
+            </span>
+
+            {airingNow ? (
+              <span className="inline-flex items-center gap-1.5 font-medium text-[var(--fr-accent-blue)]">
+                <span className="fr-live-dot h-1.5 w-1.5 rounded-full bg-current" />
+                Airing now
+              </span>
+            ) : countdown ? (
+              <span
+                className="inline-flex items-center gap-1 tabular-nums font-medium text-[var(--fr-ink)]"
+                title={
+                  airing.nextEpisode != null ? `EP ${airing.nextEpisode} next` : undefined
+                }
+              >
+                <Clock className="h-3 w-3 text-[var(--fr-ink-muted)]" />
+                {countdown}
+              </span>
+            ) : (
+              <span className="text-[var(--fr-ink-muted)]">Finale aired</span>
+            )}
+          </div>
+
+          <div className="h-1 overflow-hidden rounded-full bg-white/10">
             <div
-              className="h-full rounded-full"
-              style={{
-                width: `${airing.progressPct}%`,
-                background: "var(--accent)",
-              }}
+              className={cn(
+                "h-full rounded-full transition-[width] duration-500",
+                airingNow ? "bg-[var(--fr-accent-blue)]" : "bg-white/80",
+              )}
+              style={{ width: `${airing.progressPct}%` }}
             />
           </div>
-        </div>
-
-        <div className="flex items-center justify-between text-[11px] text-[var(--fr-ink-muted)]">
-          {countdown ? (
-            <span className="inline-flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {countdown === "now" ? (
-                <span className="font-medium text-[var(--accent)]">
-                  Airing now
-                </span>
-              ) : (
-                <>
-                  EP {airing.nextEpisode} · {countdown}
-                </>
-              )}
-            </span>
-          ) : (
-            <span>Finale aired</span>
-          )}
-          <a
-            href={anime.siteUrl}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Open on AniList"
-            className="opacity-0 transition group-hover:opacity-100 hover:text-[var(--fr-ink)]"
-          >
-            <ExternalLink className="h-3 w-3" />
-          </a>
         </div>
       </div>
     </article>
