@@ -7,18 +7,25 @@ import DashboardLoading from "@/components/dashboard-loading";
 // an hour, and this keeps us well inside AniList's rate limits.
 export const revalidate = 3600;
 
-export default async function Home() {
+export default function Home() {
+  // The fetch lives inside the suspended child (not here) so the static shell
+  // and the loading fallback stream immediately; the board swaps in when the
+  // AniList data resolves, instead of the whole document blocking on it.
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <Board />
+    </Suspense>
+  );
+}
+
+async function Board() {
   let anime;
   try {
     anime = await fetchAiringAnime();
   } catch {
     return <LoadError />;
   }
-  return (
-    <Suspense fallback={<DashboardLoading />}>
-      <Dashboard anime={anime} />
-    </Suspense>
-  );
+  return <Dashboard anime={anime} />;
 }
 
 function LoadError() {

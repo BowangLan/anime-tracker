@@ -7,6 +7,8 @@
 // far into its run it is. All time-of-day interpretation happens on the client
 // (see lib/schedule.ts) so the weekday reflects the *viewer's* timezone.
 
+import { cache } from "react";
+
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday … 6 = Saturday
 
 export const WEEKDAYS: { value: Weekday; short: string; long: string }[] = [
@@ -430,6 +432,13 @@ export interface AnimeDetail {
   modNotes: string | null;
 }
 
+// Only the fields the detail page actually renders. AniList's connections
+// (characters, staff, reviews, recommendations) default to a large page size,
+// so each is capped with `perPage` to match the slice the UI shows — this alone
+// cuts the response ~70% versus requesting the full payload. Fields the type
+// declares but the page never reads (staff bios, review bodies, mediaListEntry,
+// full pageInfo, name variants) are omitted; they arrive as `undefined` and
+// nothing touches them.
 const DETAIL_QUERY = /* GraphQL */ `
   query AllMediaFields($id: Int!) {
     Media(id: $id, type: ANIME) {
@@ -439,44 +448,52 @@ const DETAIL_QUERY = /* GraphQL */ `
       isLicensed source hashtag trailer { id site thumbnail } updatedAt
       coverImage { extraLarge large medium color } bannerImage genres synonyms averageScore
       meanScore popularity isLocked trending favourites
-      tags { id name description category rank isGeneralSpoiler isMediaSpoiler isAdult userId }
-      relations { edges { id relationType node { id idMal title { romaji english native userPreferred } type format status siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
-      characters { edges { id role name node { id name { first middle last full native userPreferred } image { large medium } siteUrl } voiceActors { id name { first middle last full native userPreferred } languageV2 image { large medium } siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
-      staff { edges { id role node { id name { first middle last full native userPreferred } languageV2 image { large medium } description(asHtml: false) primaryOccupations gender dateOfBirth { year month day } dateOfDeath { year month day } age yearsActive homeTown bloodType siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
-      studios { edges { isMain node { id name isAnimationStudio siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
-      isFavourite isFavouriteBlocked isAdult nextAiringEpisode { id airingAt timeUntilAiring episode mediaId }
-      airingSchedule(perPage: 50) { nodes { id airingAt timeUntilAiring episode mediaId } pageInfo { total perPage currentPage lastPage hasNextPage } }
-      trends { nodes { mediaId date trending averageScore popularity inProgress releasing episode } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      tags { id name category rank isMediaSpoiler }
+      relations { edges { id relationType node { id title { userPreferred } type format status siteUrl } } pageInfo { total } }
+      characters(perPage: 18) { edges { id role name node { id name { userPreferred } image { large } siteUrl } voiceActors { id name { userPreferred } languageV2 image { large } siteUrl } } pageInfo { total } }
+      staff(perPage: 20) { edges { id role node { id name { userPreferred } image { large } siteUrl } } pageInfo { total } }
+      studios { edges { isMain node { id name isAnimationStudio siteUrl } } }
+      isFavourite isAdult nextAiringEpisode { id airingAt timeUntilAiring episode mediaId }
+      airingSchedule(perPage: 50) { nodes { id airingAt timeUntilAiring episode mediaId } pageInfo { total } }
+      trends(perPage: 1) { nodes { date } }
       externalLinks { id url site siteId type language color icon notes isDisabled }
-      streamingEpisodes { title thumbnail url site }
-      rankings { id rank type format year season allTime context }
-      mediaListEntry { id userId mediaId status score progress progressVolumes repeat priority private notes hiddenFromStatusLists customLists advancedScores startedAt { year month day } completedAt { year month day } updatedAt createdAt }
-      reviews { nodes { id userId mediaId mediaType summary body rating ratingAmount score private siteUrl createdAt updatedAt user { id name siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
-      recommendations { nodes { id rating userRating mediaRecommendation { id idMal title { romaji english native userPreferred } type format status siteUrl } user { id name siteUrl } } pageInfo { total perPage currentPage lastPage hasNextPage } }
+      streamingEpisodes { title url site }
+      rankings { id rank context }
+      reviews(perPage: 4) { nodes { id summary rating ratingAmount siteUrl user { name } } pageInfo { total } }
+      recommendations(perPage: 16) { nodes { id rating mediaRecommendation { id title { userPreferred } type format siteUrl } } pageInfo { total } }
       stats { scoreDistribution { score amount } statusDistribution { status amount } }
-      siteUrl autoCreateForumThread isRecommendationBlocked isReviewBlocked modNotes
+      siteUrl
     }
   }
 `;
 
-/** Fetch AniList's complete public media detail payload for one anime. */
-export async function fetchAnimeDetail(id: number): Promise<AnimeDetail | null> {
-  const res = await fetch("https://graphql.anilist.co", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ query: DETAIL_QUERY, variables: { id } }),
-    next: { revalidate: 3600 },
-  });
+/**
+ * Fetch AniList's public media detail payload for one anime.
+ *
+ * Wrapped in React's `cache()` so the detail route's two callers within a single
+ * request — `generateMetadata` and the page component — share one round trip.
+ * Next.js only memoizes GET fetches, and this is a POST, so without this the
+ * (large) query would run twice per request.
+ */
+export const fetchAnimeDetail = cache(
+  async (id: number): Promise<AnimeDetail | null> => {
+    const res = await fetch("https://graphql.anilist.co", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ query: DETAIL_QUERY, variables: { id } }),
+      next: { revalidate: 3600 },
+    });
 
-  if (!res.ok) throw new Error(`AniList request failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) throw new Error(`AniList request failed: ${res.status} ${res.statusText}`);
 
-  const json = (await res.json()) as {
-    data?: { Media: AnimeDetail | null };
-    errors?: { message: string }[];
-  };
-  if (json.errors?.length) throw new Error(json.errors[0].message);
-  return json.data?.Media ?? null;
-}
+    const json = (await res.json()) as {
+      data?: { Media: AnimeDetail | null };
+      errors?: { message: string }[];
+    };
+    if (json.errors?.length) throw new Error(json.errors[0].message);
+    return json.data?.Media ?? null;
+  },
+);
 
 function normalize(m: RawMedia): AiringAnime {
   const schedule = [...m.airingSchedule.nodes].sort((a, b) => a.episode - b.episode);
@@ -526,7 +543,10 @@ export async function searchAnime(query: string): Promise<AnimeSearchResult[]> {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ query: SEARCH_QUERY, variables: { query: cleanQuery, page: 1 } }),
-    cache: "no-store",
+    // Cache identical searches briefly. The catalog is stable minute-to-minute,
+    // so this collapses repeat queries (debounced typing, back-navigation) onto
+    // one AniList round trip without making results feel stale.
+    next: { revalidate: 300 },
   });
 
   if (!res.ok) throw new Error(`AniList search failed: ${res.status} ${res.statusText}`);
@@ -548,40 +568,49 @@ export async function searchAnime(query: string): Promise<AnimeSearchResult[]> {
     .map(({ anime }) => anime);
 }
 
+/** Fetch a single popularity-sorted page of the current season's airing shows. */
+async function fetchAiringPage(
+  season: Season,
+  year: number,
+  page: number,
+): Promise<RawMedia[]> {
+  const res = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ query: QUERY, variables: { season, year, page } }),
+    // Regenerate hourly; airing schedules don't change minute-to-minute.
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) {
+    throw new Error(`AniList request failed: ${res.status} ${res.statusText}`);
+  }
+
+  const json = (await res.json()) as {
+    data?: { Page?: { pageInfo: { hasNextPage: boolean }; media: RawMedia[] } };
+    errors?: { message: string }[];
+  };
+  if (json.errors?.length) throw new Error(json.errors[0].message);
+
+  return json.data?.Page?.media ?? [];
+}
+
 /**
- * Fetch the current season's currently-airing shows. Pages through AniList
- * (popularity-sorted) up to `maxPages`. Only keeps shows we can actually place
- * on a weekday — i.e. those with at least one known airing time.
+ * Fetch the current season's currently-airing shows. Requests all `maxPages`
+ * popularity-sorted pages concurrently rather than serially — turning what was
+ * an N-round-trip waterfall into a single round trip — then keeps only shows we
+ * can place on a weekday (those with at least one known airing time). Pages past
+ * the end simply come back empty, so over-requesting a page is harmless.
  */
 export async function fetchAiringAnime(maxPages = 3): Promise<AiringAnime[]> {
   const { season, year } = currentSeason();
-  const all: AiringAnime[] = [];
 
-  for (let page = 1; page <= maxPages; page++) {
-    const res = await fetch("https://graphql.anilist.co", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ query: QUERY, variables: { season, year, page } }),
-      // Regenerate the page hourly; airing schedules don't change minute-to-minute.
-      next: { revalidate: 3600 },
-    });
+  const pages = await Promise.all(
+    Array.from({ length: maxPages }, (_, i) => fetchAiringPage(season, year, i + 1)),
+  );
 
-    if (!res.ok) {
-      throw new Error(`AniList request failed: ${res.status} ${res.statusText}`);
-    }
-
-    const json = (await res.json()) as {
-      data?: { Page?: { pageInfo: { hasNextPage: boolean }; media: RawMedia[] } };
-      errors?: { message: string }[];
-    };
-    if (json.errors?.length) throw new Error(json.errors[0].message);
-
-    const pageData = json.data?.Page;
-    if (!pageData) break;
-
-    all.push(...pageData.media.map(normalize));
-    if (!pageData.pageInfo.hasNextPage) break;
-  }
-
-  return all.filter((a) => a.next || a.schedule.length > 0);
+  return pages
+    .flat()
+    .map(normalize)
+    .filter((a) => a.next || a.schedule.length > 0);
 }
