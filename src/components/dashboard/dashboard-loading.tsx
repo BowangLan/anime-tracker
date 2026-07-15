@@ -1,4 +1,5 @@
 import { Search, Star, Tv } from "lucide-react";
+import { Skeleton } from "@/components/common/skeleton";
 
 export default function DashboardLoading() {
   return (
@@ -65,8 +66,4 @@ export default function DashboardLoading() {
       </main>
     </div>
   );
-}
-
-function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse bg-white/[0.07] ${className ?? ""}`} />;
 }

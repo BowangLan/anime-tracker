@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { fetchAiringAnime } from "@/lib/anilist";
-import { Dashboard } from "@/components/dashboard";
-import DashboardLoading from "@/components/dashboard-loading";
+import { Dashboard } from "@/components/dashboard/dashboard";
+import DashboardLoading from "@/components/dashboard/dashboard-loading";
 
 // Statically generate and refresh hourly — airing schedules are stable within
 // an hour, and this keeps us well inside AniList's rate limits.

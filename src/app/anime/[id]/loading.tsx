@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@/components/common/skeleton";
 
 export default function AnimeDetailLoading() {
   return (
@@ -61,8 +62,4 @@ export default function AnimeDetailLoading() {
       </div>
     </main>
   );
-}
-
-function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse bg-white/[0.07] ${className ?? ""}`} />;
 }
