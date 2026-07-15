@@ -2,6 +2,7 @@
 
 import { Star } from "lucide-react";
 import { useFollows } from "@/lib/store";
+import { cue } from "@/lib/sound";
 
 export function FollowButton({ id }: { id: number }) {
   const following = useFollows((state) => state.following.includes(id));
@@ -10,7 +11,10 @@ export function FollowButton({ id }: { id: number }) {
   return (
     <button
       type="button"
-      onClick={() => toggleFollow(id)}
+      onClick={() => {
+        cue(following ? "tick" : "success");
+        toggleFollow(id);
+      }}
       aria-pressed={following}
       className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold text-black transition hover:bg-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--detail-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
     >

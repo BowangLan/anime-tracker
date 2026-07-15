@@ -7,6 +7,7 @@ import { Star, Clock, ExternalLink as ExternalLinkIcon } from "lucide-react";
 import type { AiringAnime, AnimeExternalLink } from "@/lib/anilist";
 import { type Airing, untilLabel } from "@/lib/schedule";
 import { useFollows } from "@/lib/store";
+import { cue } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 
 /**
@@ -60,7 +61,10 @@ export function AnimeCard({
             <ExternalLinksMenu links={anime.externalLinks} />
             <button
               aria-label={following ? "Unfollow" : "Follow"}
-              onClick={() => toggleFollow(anime.id)}
+              onClick={() => {
+                cue(following ? "tick" : "success");
+                toggleFollow(anime.id);
+              }}
               className={cn(
                 "grid h-6 w-6 place-items-center rounded-full transition",
                 following
@@ -131,6 +135,7 @@ function ExternalLinksMenu({ links }: { links: AnimeExternalLink[] }) {
       <Menu.Trigger
         aria-label="External links"
         title="External links"
+        data-cuelume-press
         className="grid h-6 w-6 place-items-center rounded-full text-[var(--fr-ink-muted)] opacity-70 transition hover:bg-white/[0.06] hover:text-[var(--fr-ink)] hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60 data-popup-open:bg-white/[0.08] data-popup-open:text-[var(--fr-ink)] data-popup-open:opacity-100"
       >
         <ExternalLinkIcon className="h-3.5 w-3.5" />

@@ -19,6 +19,7 @@ import { WEEKDAYS } from "@/lib/anilist";
 import { deriveAiring, untilLabel, type Airing } from "@/lib/schedule";
 import { useNow } from "@/lib/use-now";
 import { useFollows } from "@/lib/store";
+import { cue } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import { AnimeCard } from "@/components/anime-card";
 import { StarRating } from "@/components/star-rating";
@@ -120,7 +121,10 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
           error?: string;
         };
         if (!response.ok) throw new Error(payload.error || "Search failed.");
-        setSearchResponse({ query: cleanQuery, results: payload.results ?? [], error: "" });
+        const results = payload.results ?? [];
+        setSearchResponse({ query: cleanQuery, results, error: "" });
+        // A soft "results landed" cue — one droplet per completed query.
+        cue(results.length > 0 ? "droplet" : "whisper");
       } catch (error) {
         if (controller.signal.aborted) return;
         setSearchResponse({
@@ -192,7 +196,10 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
             return (
               <button
                 key={day}
-                onClick={() => scrollToDay(day)}
+                onClick={() => {
+                  cue("tick");
+                  scrollToDay(day);
+                }}
                 className="flex items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[13px] text-[var(--fr-ink-muted)] transition hover:bg-white/[0.04] hover:text-[var(--fr-ink)]"
               >
                 <span className="flex items-center gap-2">
@@ -250,7 +257,10 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
             {isSearching && (
               <button
                 type="button"
-                onClick={clearSearch}
+                onClick={() => {
+                  cue("tick");
+                  clearSearch();
+                }}
                 aria-label="Clear search"
                 className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-[var(--fr-ink-muted)] transition hover:bg-white/10 hover:text-[var(--fr-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60"
               >
@@ -400,7 +410,10 @@ function FavoritesSwitch({
       role="switch"
       aria-checked={checked}
       aria-label={compact ? "Show favorites only" : undefined}
-      onClick={() => onCheckedChange(!checked)}
+      onClick={() => {
+        cue("toggle");
+        onCheckedChange(!checked);
+      }}
       className={cn(
         "flex shrink-0 items-center rounded-[8px] text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60",
         compact
