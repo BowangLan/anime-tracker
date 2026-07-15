@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { dayLabel, type BoardModel } from "./model";
 import { AnimeCard } from "./anime-card";
 import { EmptyState } from "./empty-state";
+import { SectionHeader } from "./section-header";
 
 export function WeekBoard({
   model,
@@ -24,22 +25,12 @@ export function WeekBoard({
 }) {
   return (
     <section className="min-w-0">
-      <div className="flex items-baseline gap-3 pb-1">
-        <h2
-          className="text-[16px] font-semibold text-[var(--fr-ink)]"
-          style={{ letterSpacing: "-0.02em" }}
-        >
-          This week&apos;s schedule
-        </h2>
-        <span className="text-[12px] text-[var(--fr-ink-muted)]">
-          Scroll across the seven days
-        </span>
-      </div>
+      <SectionHeader title={"This week's schedule"} description="Scroll across the seven days" />
 
       {model.total === 0 ? (
         <EmptyState onlyFollowing={onlyFollowing} hasQuery={hasQuery} onClear={onClear} />
       ) : (
-        <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2 pt-3">
+        <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2">
           {model.order.map((day) => {
             const entries = model.byDay.get(day) ?? [];
             const { name } = dayLabel(day, model.today);

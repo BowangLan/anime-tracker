@@ -2,13 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import type { AiringAnime } from "@/lib/anilist";
 import { type Airing, untilLabel } from "@/lib/schedule";
-import { useFollows } from "@/lib/store";
-import { cue } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import { ExternalLinksMenu } from "./external-links-menu";
+import { FavoriteButton } from "./favorite-button";
 
 /**
  * Compact schedule row for a day column: cover, title, season progress, and the
@@ -25,9 +24,6 @@ export function AnimeCard({
   airing: Airing;
   now: number;
 }) {
-  const following = useFollows((s) => s.following.includes(anime.id));
-  const toggleFollow = useFollows((s) => s.toggleFollow);
-
   const total = anime.totalEpisodes;
   const countdown =
     airing.nextAiringAt != null ? untilLabel(airing.nextAiringAt, now) : null;
@@ -51,21 +47,7 @@ export function AnimeCard({
           </h3>
           <div className="relative z-10 -mr-0.5 flex shrink-0 items-center">
             <ExternalLinksMenu links={anime.externalLinks} />
-            <button
-              aria-label={following ? "Unfollow" : "Follow"}
-              onClick={() => {
-                cue(following ? "tick" : "success");
-                toggleFollow(anime.id);
-              }}
-              className={cn(
-                "grid h-6 w-6 place-items-center rounded-full transition",
-                following
-                  ? "text-[var(--fr-ink)]"
-                  : "text-[var(--fr-ink-muted)] opacity-70 hover:text-[var(--fr-ink)] hover:opacity-100",
-              )}
-            >
-              <Star className={cn("h-3.5 w-3.5", following && "fill-current")} />
-            </button>
+            <FavoriteButton animeId={anime.id} className="h-6 w-6 bg-transparent text-[var(--fr-ink-muted)] hover:bg-transparent hover:text-[var(--fr-ink)]" />
           </div>
         </div>
 

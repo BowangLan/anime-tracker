@@ -12,6 +12,9 @@ import { Stats } from "./stats";
 import { WeekBoard } from "./week-board";
 import { BoardSkeleton } from "./board-skeleton";
 import { SearchResults } from "./search/search-results";
+import { NewReleasesSection } from "./new-releases-section";
+import { CurrentlyPopularSection } from "./currently-popular-section";
+import { FavoritesSection } from "./favorites-section";
 
 export function Dashboard({ anime }: { anime: AiringAnime[] }) {
   const now = useNow();
@@ -65,6 +68,11 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
         ) : (
           <div className="flex min-w-0 flex-col gap-6 p-5">
             <Stats model={model} />
+            <FavoritesSection anime={anime} following={following} now={now!} />
+            <div className="grid min-w-0 gap-[30px] xl:h-[440px] xl:grid-cols-[minmax(0,1fr)_310px]">
+              <NewReleasesSection anime={anime} now={now!} />
+              <CurrentlyPopularSection anime={anime} now={now!} />
+            </div>
             <WeekBoard
               model={model}
               now={now!}
