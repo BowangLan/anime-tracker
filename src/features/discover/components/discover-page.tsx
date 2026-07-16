@@ -58,24 +58,24 @@ export function DiscoverPage({ anime }: { anime: AiringAnime[] }) {
   );
 
   return (
-    <main className="min-h-screen max-h-screen flex flex-col">
+    <main className="min-h-full">
       <PageHeader
         eyebrow="Catalog"
         title="Discover anime"
         description="Search the full AniList catalog or filter the current airing season"
       />
 
-      <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
-        <div className="sticky top-14 z-30 border-b border-border bg-background/95 px-5 py-3 backdrop-blur sm:px-8 lg:top-0 lg:px-7 flex-none">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div>
+        <div className="sticky top-14 z-30 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:px-8 lg:top-0 lg:px-7">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
             <div className="relative min-w-0 flex-1 sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--fr-ink-muted)]" />
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fr-ink-muted)]" />
               <input
                 value={search.query}
                 onChange={(event) => search.updateQuery(event.target.value)}
                 placeholder="Search title, studio, or keyword"
                 aria-label="Search anime titles"
-                className="h-9 w-full rounded-[8px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] pl-9 pr-9 text-[12px] outline-none placeholder:text-[var(--fr-ink-muted)] focus:ring-2 focus:ring-[var(--fr-accent-blue)]/40"
+                className="h-11 w-full rounded-[10px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] pl-10 pr-10 text-sm outline-none placeholder:text-[var(--fr-ink-muted)] focus:ring-2 focus:ring-[var(--fr-accent-blue)]/40 sm:h-9 sm:rounded-[8px] sm:pl-9 sm:pr-9 sm:text-[12px]"
               />
               {search.isSearching && (
                 <button
@@ -89,11 +89,11 @@ export function DiscoverPage({ anime }: { anime: AiringAnime[] }) {
               )}
             </div>
             {!search.isSearching && (
-              <>
-                <label className="flex items-center gap-2 text-[11px] text-[var(--fr-ink-muted)]">
+              <div className="flex items-center justify-between gap-3 sm:justify-start">
+                <label className="flex min-w-0 items-center gap-2 text-xs text-[var(--fr-ink-muted)] sm:text-[11px]">
                   Sort{" "}
-                  <Select>
-                    <SelectTrigger>
+                  <Select value={sort} onValueChange={(value) => setSort(value ?? "popular")}>
+                    <SelectTrigger className="h-9 min-w-32 sm:h-8">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
                     <SelectContent>
@@ -103,21 +103,21 @@ export function DiscoverPage({ anime }: { anime: AiringAnime[] }) {
                     </SelectContent>
                   </Select>
                 </label>
-                <span className="text-[11px] tabular-nums text-[var(--fr-ink-muted)]">
+                <span className="shrink-0 text-xs tabular-nums text-[var(--fr-ink-muted)] sm:text-[11px]">
                   {filtered.length} results
                 </span>
-              </>
+              </div>
             )}
           </div>
           {!search.isSearching && (
-            <div className="no-scrollbar -mx-5 mt-3 flex gap-1.5 overflow-x-auto px-5 sm:-mx-8 sm:px-8 lg:-mx-7 lg:px-7">
+            <div className="no-scrollbar -mx-4 mt-3 flex snap-x gap-2 overflow-x-auto px-4 pb-0.5 sm:-mx-8 sm:gap-1.5 sm:px-8 lg:-mx-7 lg:px-7">
               {featuredGenres.map((genre) => (
                 <button
                   key={genre}
                   type="button"
                   onClick={() => setGenre(genre)}
                   className={cn(
-                    "shrink-0 rounded-[6px] border px-2.5 py-1.5 text-[11px] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60",
+                    "shrink-0 snap-start rounded-[7px] border px-3 py-2 text-xs outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60 sm:rounded-[6px] sm:px-2.5 sm:py-1.5 sm:text-[11px]",
                     genre === selectedGenre
                       ? "border-white/20 bg-white text-black"
                       : "border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] text-[var(--fr-ink-muted)] hover:text-white",
@@ -140,19 +140,14 @@ export function DiscoverPage({ anime }: { anime: AiringAnime[] }) {
             onClear={search.clearSearch}
           />
         ) : (
-          <div className="px-5 py-5 sm:px-8 lg:px-7">
+          <div className="px-4 py-5 sm:px-8 lg:px-7">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-[13px] font-semibold">Currently airing</h2>
               <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--fr-ink-muted)]">
                 Current season
               </span>
             </div>
-            <div
-              className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
-              style={{
-                gridTemplateRows: `repeat(${Math.ceil(filtered.length / 6)}, minmax(1fr, 100px))`,
-              }}
-            >
+            <div className="grid grid-cols-2 items-start gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-4 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
               {filtered.slice(0, 30).map((show, index) => (
                 <DiscoveryCard key={show.id} anime={show} eager={index < 8} />
               ))}
