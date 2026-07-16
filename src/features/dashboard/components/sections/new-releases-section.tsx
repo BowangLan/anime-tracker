@@ -25,7 +25,7 @@ export function NewReleasesSection({ anime, now }: { anime: AiringAnime[]; now: 
 
   return (
     <section className="min-w-0" aria-labelledby="new-releases-heading">
-      <SectionHeader id="new-releases-heading" title="New Releases" description="Episodes airing today" />
+      <SectionHeader id="new-releases-heading" title="Airing today" description={`${releases.length} ${releases.length === 1 ? "episode" : "episodes"}`} />
       {releases.length > 0 ? (
         <HorizontalAnimeList shows={releases} />
       ) : (

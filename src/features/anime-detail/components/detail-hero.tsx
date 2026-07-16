@@ -24,7 +24,7 @@ export function DetailHero({
           className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/35 px-3.5 py-2 text-[12px] font-medium text-white backdrop-blur-md transition hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--detail-accent)]"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Weekly board
+          Back to home
         </Link>
         <a
           href={anime.siteUrl}

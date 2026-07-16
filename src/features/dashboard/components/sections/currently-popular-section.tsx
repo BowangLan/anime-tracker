@@ -10,7 +10,7 @@ export function CurrentlyPopularSection({ anime, now }: { anime: AiringAnime[]; 
 
   return (
     <section className="flex min-h-0 min-w-0 flex-col" aria-labelledby="currently-popular-heading">
-      <SectionHeader id="currently-popular-heading" title="Currently Popular" description="Popular airing shows" />
+      <SectionHeader id="currently-popular-heading" title="Popular this season" description="By AniList popularity" />
       <ol className="border-t border-[var(--fr-hairline-soft)] xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
         {popular.map(({ anime: show, airing }, index) => (
           <li key={show.id} className="border-b border-[var(--fr-hairline-soft)]">

@@ -20,12 +20,12 @@ type DetailPageProps = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: DetailPageProps): Promise<Metadata> {
   const id = parseId((await params).id);
-  if (id == null) return { title: "Anime not found — Airing" };
+  if (id == null) return { title: "Anime not found — Anime Tracker" };
   const anime = await fetchAnimeDetail(id).catch(() => null);
-  if (!anime) return { title: "Anime not found — Airing" };
+  if (!anime) return { title: "Anime not found — Anime Tracker" };
   const title = anime.title.english || anime.title.userPreferred;
   return {
-    title: `${title} — Airing`,
+    title: `${title} — Anime Tracker`,
     description: plainText(anime.description).slice(0, 155),
     openGraph: {
       title,

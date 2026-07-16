@@ -1,92 +1,75 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import type { AiringAnime, Weekday } from "@/lib/anilist";
+import { useMemo } from "react";
+import type { AiringAnime } from "@/lib/anilist";
 import { useNow } from "@/hooks/use-now";
 import { useFollows } from "@/stores/follows-store";
 import { buildBoardModel } from "@/features/dashboard/lib/board-model";
-import { useAnimeSearch } from "@/features/dashboard/hooks/use-anime-search";
-import { Sidebar } from "./layout/sidebar";
-import { Topbar } from "./layout/topbar";
 import { Stats } from "./layout/stats";
-import { WeekBoard } from "./sections/week-board";
 import { BoardSkeleton } from "./board-skeleton";
-import { SearchResults } from "./search/search-results";
-import { NewReleasesSection } from "./sections/new-releases-section";
 import { CurrentlyPopularSection } from "./sections/currently-popular-section";
 import { FavoritesSection } from "./sections/favorites-section";
+import { PageHeader } from "@/components/app-shell/page-header";
+import { AnimeCard } from "./cards/anime-card";
+import { SectionHeader } from "./sections/section-header";
+
+const TODAY_GRID_ROWS = 3;
 
 export function Dashboard({ anime }: { anime: AiringAnime[] }) {
   const now = useNow();
   const following = useFollows((s) => s.following);
-  const [onlyFollowing, setOnlyFollowing] = useState(true);
-  const columnRefs = useRef<Map<Weekday, HTMLElement | null>>(new Map());
-
-  const search = useAnimeSearch();
 
   // Time-based, so it waits for the client clock (see BoardSkeleton fallback).
   const model = useMemo(
-    () => (now == null ? null : buildBoardModel(anime, now, onlyFollowing, following)),
-    [anime, now, onlyFollowing, following],
+    () => (now == null ? null : buildBoardModel(anime, now, false, following)),
+    [anime, now, following],
   );
 
-  const scrollToDay = (day: Weekday) =>
-    columnRefs.current
-      .get(day)
-      ?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
-
   return (
-    <div className="flex min-h-screen bg-[var(--fr-canvas)]">
-      <Sidebar
-        model={model}
-        onlyFollowing={onlyFollowing}
-        onOnlyFollowingChange={setOnlyFollowing}
-        onNavigate={scrollToDay}
+    <main className="min-h-screen max-h-screen overflow-y-auto flex flex-col">
+      <PageHeader
+        eyebrow="Dashboard"
+        title="Home"
+        description="Your currently airing season and followed shows"
       />
-
-      <main className="flex min-w-0 flex-1 flex-col">
-        <Topbar
-          query={search.query}
-          onQueryChange={search.updateQuery}
-          isSearching={search.isSearching}
-          onClear={search.clearSearch}
-          onlyFollowing={onlyFollowing}
-          onOnlyFollowingChange={setOnlyFollowing}
-        />
-
-        {model == null ? (
-          <BoardSkeleton />
-        ) : search.isSearching ? (
-          <SearchResults
-            results={search.results}
-            query={search.searchQuery}
-            now={now!}
-            state={search.state}
-            error={search.error}
-            onClear={search.clearSearch}
-          />
-        ) : (
-          <div className="flex min-w-0 flex-col gap-6 p-5">
-            <Stats model={model} />
-            <FavoritesSection anime={anime} following={following} now={now!} />
-            <div className="grid min-w-0 gap-[30px] xl:h-[440px] xl:grid-cols-[minmax(0,1fr)_310px]">
-              <NewReleasesSection anime={anime} now={now!} />
-              <CurrentlyPopularSection anime={anime} now={now!} />
-            </div>
-            <WeekBoard
-              model={model}
-              now={now!}
-              onlyFollowing={onlyFollowing}
-              hasQuery={search.query.trim().length > 0}
-              onClear={() => {
-                setOnlyFollowing(false);
-                search.clearSearch();
-              }}
-              columnRefs={columnRefs}
-            />
+      {model == null ? (
+        <BoardSkeleton />
+      ) : (
+        <div className="flex min-w-0 flex-col gap-7 px-5 py-5 sm:px-8 lg:px-7 flex-1 min-h-0 overflow-y-auto">
+          <Stats model={model} />
+          <FavoritesSection anime={anime} following={following} now={now!} />
+          <div className="grid min-w-0 gap-7 xl:h-[440px] xl:grid-cols-[minmax(0,1fr)_320px] shrink-0">
+            <section className="min-w-0 pr-1">
+              <SectionHeader
+                title="Today"
+                description={`${model.todayCount} scheduled ${model.todayCount === 1 ? "release" : "releases"}`}
+              />
+              {model.todayCount > 0 ? (
+                <div
+                  className="grid snap-x snap-mandatory grid-flow-col auto-cols-[minmax(280px,calc((100%-0.625rem)/2))] gap-2.5 overflow-x-auto overscroll-x-contain pb-2 [&>*]:snap-start"
+                  style={{
+                    gridTemplateRows: `repeat(${TODAY_GRID_ROWS}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {(model.byDay.get(model.today) ?? []).map((entry) => (
+                    <AnimeCard
+                      key={entry.anime.id}
+                      anime={entry.anime}
+                      airing={entry.airing}
+                      now={now!}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="py-12 text-center text-[12px] text-[var(--fr-ink-muted)]">
+                  No releases scheduled today.
+                </p>
+              )}
+            </section>
+            <CurrentlyPopularSection anime={anime} now={now!} />
           </div>
-        )}
-      </main>
-    </div>
+        </div>
+      )}
+    </main>
   );
 }

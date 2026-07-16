@@ -7,6 +7,9 @@ one question at a glance: _what's dropping, and when?_
 The schedule is fetched live from the **AniList** GraphQL API (free, no key).
 The only thing stored locally is which shows you follow.
 
+For a dated product/technical audit and proposed roadmap, see
+[`docs/STATE_AND_DIRECTIONS.md`](docs/STATE_AND_DIRECTIONS.md).
+
 ## Stack
 
 - **Next.js 16** (App Router) + **React 19**

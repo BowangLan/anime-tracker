@@ -1,10 +1,10 @@
 export function SectionHeader({ id, title, description }: { id?: string; title: string; description: string }) {
   return (
-    <header className="mb-5 flex flex-col gap-1">
-      <h2 id={id} className="text-[22px] font-bold leading-[1.2] tracking-[-0.8px] text-[var(--fr-ink)]">
+    <header className="mb-4 flex items-end justify-between gap-4 border-b border-border pb-3 flex-none">
+      <h2 id={id} className="text-base font-medium leading-tight tracking-[-0.02em] text-foreground">
         {title}
       </h2>
-      <p className="text-[12px] leading-[1.2] tracking-[-0.12px] text-[var(--fr-ink-muted)]">
+      <p className="text-right text-sm leading-tight text-muted-foreground">
         {description}
       </p>
     </header>

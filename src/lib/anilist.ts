@@ -141,6 +141,26 @@ const SEARCH_QUERY = /* GraphQL */ `
   }
 `;
 
+const FAVORITES_QUERY = /* GraphQL */ `
+  query FavoriteAnime($ids: [Int]) {
+    Page(page: 1, perPage: 50) {
+      media(id_in: $ids, type: ANIME, isAdult: false, sort: POPULARITY_DESC) {
+        id
+        title { romaji english }
+        coverImage { extraLarge large color }
+        episodes
+        genres
+        siteUrl
+        externalLinks { id url site siteId type language color icon notes isDisabled }
+        description(asHtml: false)
+        studios(isMain: true) { nodes { name } }
+        nextAiringEpisode { episode airingAt }
+        airingSchedule(perPage: 60) { nodes { episode airingAt } }
+      }
+    }
+  }
+`;
+
 // Shape of the slice of the AniList response we actually read.
 interface RawMedia {
   id: number;
@@ -566,6 +586,32 @@ export async function searchAnime(query: string): Promise<AnimeSearchResult[]> {
         a.index - b.index,
     )
     .map(({ anime }) => anime);
+}
+
+/** Resolve the user's device-local favorite ids into renderable anime data. */
+export async function fetchFavoriteAnime(ids: number[]): Promise<AiringAnime[]> {
+  const cleanIds = [...new Set(ids)].filter((id) => Number.isInteger(id) && id > 0).slice(0, 50);
+  if (cleanIds.length === 0) return [];
+
+  const res = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ query: FAVORITES_QUERY, variables: { ids: cleanIds } }),
+    next: { revalidate: 3600 },
+  });
+  if (!res.ok) throw new Error(`AniList favorites request failed: ${res.status} ${res.statusText}`);
+
+  const json = (await res.json()) as {
+    data?: { Page?: { media: RawMedia[] } };
+    errors?: { message: string }[];
+  };
+  if (json.errors?.length) throw new Error(json.errors[0].message);
+
+  const byId = new Map((json.data?.Page?.media ?? []).map((media) => [media.id, normalize(media)]));
+  return cleanIds.flatMap((id) => {
+    const anime = byId.get(id);
+    return anime ? [anime] : [];
+  });
 }
 
 /** Fetch a single popularity-sorted page of the current season's airing shows. */

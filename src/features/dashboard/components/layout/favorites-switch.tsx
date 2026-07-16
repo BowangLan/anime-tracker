@@ -20,7 +20,7 @@ export function FavoritesSwitch({
       type="button"
       role="switch"
       aria-checked={checked}
-      aria-label={compact ? "Show favorites only" : undefined}
+      aria-label={compact ? "Show only my shows" : undefined}
       onClick={() => {
         cue("toggle");
         onCheckedChange(!checked);
@@ -36,7 +36,7 @@ export function FavoritesSwitch({
       {!compact && (
         <span className="inline-flex items-center gap-2">
           <Star className={cn("h-4 w-4", checked && "fill-current")} />
-          Favorites only
+          Only my shows
         </span>
       )}
       <span

@@ -12,7 +12,7 @@ export default function AnimeDetailLoading() {
 
         <header className="absolute inset-x-0 top-0 z-10 mx-auto flex max-w-[1320px] items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3.5 py-2 text-[12px] text-white/50">
-            <ArrowLeft className="h-3.5 w-3.5" /> Weekly board
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to home
           </span>
           <Skeleton className="h-3 w-24 rounded-full" />
         </header>

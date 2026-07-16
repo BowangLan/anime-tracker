@@ -19,10 +19,10 @@ export function FavoritesSection({
     .map((show) => ({ anime: show, airing: deriveAiring(show, now) }));
 
   return (
-    <section className="min-w-0" aria-labelledby="favorites-heading">
+    <section className="min-w-0 shrink-0" aria-labelledby="favorites-heading">
       <SectionHeader
         id="favorites-heading"
-        title="Your Favorites"
+        title="Following this season"
         description={`${favorites.length} followed ${favorites.length === 1 ? "show" : "shows"}`}
       />
 
