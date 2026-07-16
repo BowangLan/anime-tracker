@@ -1,6 +1,6 @@
 import { AlertCircle, Radio } from "lucide-react";
 import type { AnimeSearchResult } from "@/lib/anilist";
-import type { SearchState } from "../use-anime-search";
+import type { SearchState } from "@/features/dashboard/hooks/use-anime-search";
 import { EmptyState } from "../empty-state";
 import { SearchResultCard } from "./search-result-card";
 import { SearchResultsSkeleton } from "./search-results-skeleton";

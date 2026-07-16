@@ -3,9 +3,9 @@
 import type { RefObject } from "react";
 import type { Weekday } from "@/lib/anilist";
 import { cn } from "@/lib/utils";
-import { dayLabel, type BoardModel } from "./model";
-import { AnimeCard } from "./anime-card";
-import { EmptyState } from "./empty-state";
+import { dayLabel, type BoardModel } from "@/features/dashboard/lib/board-model";
+import { AnimeCard } from "../cards/anime-card";
+import { EmptyState } from "../empty-state";
 import { SectionHeader } from "./section-header";
 
 export function WeekBoard({

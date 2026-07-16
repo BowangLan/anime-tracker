@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { AnimeDetail } from "@/lib/anilist";
 import { SectionHeading } from "./section-heading";
-import { label } from "./format";
+import { label } from "../lib/format";
 
 export function Characters({ anime }: { anime: AnimeDetail }) {
   if (anime.characters.edges.length === 0) return null;

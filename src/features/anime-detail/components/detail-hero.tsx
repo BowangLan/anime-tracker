@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Play } from "lucide-react";
 import type { AnimeDetail } from "@/lib/anilist";
 import { FollowButton } from "./follow-button";
-import { compact, label, trailerUrl } from "./format";
+import { compact, label, trailerUrl } from "../lib/format";
 
 export function DetailHero({
   anime,

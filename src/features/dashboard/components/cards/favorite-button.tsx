@@ -2,7 +2,7 @@
 
 import { Star } from "lucide-react";
 import { cue } from "@/lib/sound";
-import { useFollows } from "@/lib/store";
+import { useFollows } from "@/stores/follows-store";
 import { cn } from "@/lib/utils";
 
 export function FavoriteButton({ animeId, className }: { animeId: number; className?: string }) {

@@ -1,7 +1,7 @@
 import { Star, Users } from "lucide-react";
 import type { AnimeDetail } from "@/lib/anilist";
 import { SectionHeading } from "./section-heading";
-import { compact, label } from "./format";
+import { compact, label } from "../lib/format";
 
 export function Community({ anime }: { anime: AnimeDetail }) {
   const scores = anime.stats?.scoreDistribution ?? [];

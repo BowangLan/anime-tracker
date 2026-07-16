@@ -1,7 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { useFollows } from "@/lib/store";
+import { useFollows } from "@/stores/follows-store";
 import { cue } from "@/lib/sound";
 
 export function FollowButton({ id }: { id: number }) {

@@ -2,19 +2,19 @@
 
 import { useMemo, useRef, useState } from "react";
 import type { AiringAnime, Weekday } from "@/lib/anilist";
-import { useNow } from "@/lib/use-now";
-import { useFollows } from "@/lib/store";
-import { buildBoardModel } from "./model";
-import { useAnimeSearch } from "./use-anime-search";
-import { Sidebar } from "./sidebar";
-import { Topbar } from "./topbar";
-import { Stats } from "./stats";
-import { WeekBoard } from "./week-board";
+import { useNow } from "@/hooks/use-now";
+import { useFollows } from "@/stores/follows-store";
+import { buildBoardModel } from "@/features/dashboard/lib/board-model";
+import { useAnimeSearch } from "@/features/dashboard/hooks/use-anime-search";
+import { Sidebar } from "./layout/sidebar";
+import { Topbar } from "./layout/topbar";
+import { Stats } from "./layout/stats";
+import { WeekBoard } from "./sections/week-board";
 import { BoardSkeleton } from "./board-skeleton";
 import { SearchResults } from "./search/search-results";
-import { NewReleasesSection } from "./new-releases-section";
-import { CurrentlyPopularSection } from "./currently-popular-section";
-import { FavoritesSection } from "./favorites-section";
+import { NewReleasesSection } from "./sections/new-releases-section";
+import { CurrentlyPopularSection } from "./sections/currently-popular-section";
+import { FavoritesSection } from "./sections/favorites-section";
 
 export function Dashboard({ anime }: { anime: AiringAnime[] }) {
   const now = useNow();

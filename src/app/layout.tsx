@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SoundProvider } from "@/components/sound-provider";
+import { SoundProvider } from "@/providers/sound-provider";
 
 const inter = Inter({
   variable: "--font-sans",

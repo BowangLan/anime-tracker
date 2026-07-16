@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { AiringAnime } from "@/lib/anilist";
 import { deriveAiring } from "@/lib/schedule";
 import { SectionHeader } from "./section-header";
-import { FavoriteButton } from "./favorite-button";
+import { FavoriteButton } from "../cards/favorite-button";
 
 export function FavoritesSection({
   anime,

@@ -2,17 +2,17 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchAnimeDetail, plainText } from "@/lib/anilist";
-import { DetailHero } from "@/components/anime-detail/detail-hero";
-import { Synopsis } from "@/components/anime-detail/synopsis";
-import { NextEpisode } from "@/components/anime-detail/next-episode";
-import { EpisodeGuide } from "@/components/anime-detail/episode-guide";
-import { Characters } from "@/components/anime-detail/characters";
-import { Staff } from "@/components/anime-detail/staff";
-import { Themes } from "@/components/anime-detail/themes";
-import { Community } from "@/components/anime-detail/community";
-import { RelatedTitles, Recommendations } from "@/components/anime-detail/media-links";
-import { Reviews } from "@/components/anime-detail/reviews";
-import { DetailAside } from "@/components/anime-detail/detail-aside";
+import { DetailHero } from "@/features/anime-detail/components/detail-hero";
+import { Synopsis } from "@/features/anime-detail/components/synopsis";
+import { NextEpisode } from "@/features/anime-detail/components/next-episode";
+import { EpisodeGuide } from "@/features/anime-detail/components/episode-guide";
+import { Characters } from "@/features/anime-detail/components/characters";
+import { Staff } from "@/features/anime-detail/components/staff";
+import { Themes } from "@/features/anime-detail/components/themes";
+import { Community } from "@/features/anime-detail/components/community";
+import { RelatedTitles, Recommendations } from "@/features/anime-detail/components/media-links";
+import { Reviews } from "@/features/anime-detail/components/reviews";
+import { DetailAside } from "@/features/anime-detail/components/detail-aside";
 
 export const revalidate = 3600;
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { AnimeDetail } from "@/lib/anilist";
 import { SectionHeading } from "./section-heading";
-import { label } from "./format";
+import { label } from "../lib/format";
 
 interface MediaLinkItem {
   id: number;

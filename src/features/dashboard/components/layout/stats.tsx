@@ -1,6 +1,6 @@
 import { CalendarClock, Clapperboard, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { BoardModel } from "./model";
+import type { BoardModel } from "@/features/dashboard/lib/board-model";
 
 /** The KPI widget row shown above the week board. */
 export function Stats({ model }: { model: BoardModel }) {

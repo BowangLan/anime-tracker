@@ -1,5 +1,5 @@
 import type { AiringAnime } from "@/lib/anilist";
-import { HorizontalAnimeList, type ShowCardData } from "./show-card";
+import { HorizontalAnimeList, type ShowCardData } from "../cards/show-card";
 import { SectionHeader } from "./section-header";
 
 function sameLocalDay(timestampSeconds: number, now: number) {

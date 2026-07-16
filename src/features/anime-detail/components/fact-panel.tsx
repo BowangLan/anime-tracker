@@ -1,5 +1,5 @@
 import type { AnimeDetail } from "@/lib/anilist";
-import { countryName, dateRange, label } from "./format";
+import { countryName, dateRange, label } from "../lib/format";
 
 export function FactPanel({ anime, mainStudio }: { anime: AnimeDetail; mainStudio?: string }) {
   const country = anime.countryOfOrigin ? countryName(anime.countryOfOrigin) : null;

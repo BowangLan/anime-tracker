@@ -3,7 +3,7 @@
 import { Tv } from "lucide-react";
 import { cue } from "@/lib/sound";
 import type { Weekday } from "@/lib/anilist";
-import { dayLabel, type BoardModel } from "./model";
+import { dayLabel, type BoardModel } from "@/features/dashboard/lib/board-model";
 import { FavoritesSwitch } from "./favorites-switch";
 
 export function Sidebar({
