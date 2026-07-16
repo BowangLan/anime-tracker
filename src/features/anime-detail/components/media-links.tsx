@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { animePath } from "@/lib/site";
 import { ArrowUpRight } from "lucide-react";
 import type { AnimeDetail } from "@/lib/anilist";
 import { SectionHeading } from "./section-heading";
@@ -15,7 +16,10 @@ export function RelatedTitles({ anime }: { anime: AnimeDetail }) {
   if (anime.relations.edges.length === 0) return null;
   const items = anime.relations.edges.map((edge) => ({
     id: edge.node.id,
-    href: edge.node.type === "ANIME" ? `/anime/${edge.node.id}` : edge.node.siteUrl,
+    href:
+      edge.node.type === "ANIME"
+        ? animePath(edge.node.id, edge.node.title.userPreferred)
+        : edge.node.siteUrl,
     title: edge.node.title.userPreferred,
     meta: `${label(edge.relationType)} · ${label(edge.node.format)}`,
   }));
@@ -31,7 +35,10 @@ export function Recommendations({ anime }: { anime: AnimeDetail }) {
       id: item.mediaRecommendation!.id,
       href:
         item.mediaRecommendation!.type === "ANIME"
-          ? `/anime/${item.mediaRecommendation!.id}`
+          ? animePath(
+              item.mediaRecommendation!.id,
+              item.mediaRecommendation!.title.userPreferred,
+            )
           : item.mediaRecommendation!.siteUrl,
       title: item.mediaRecommendation!.title.userPreferred,
       meta: `${label(item.mediaRecommendation!.format)} · +${item.rating}`,

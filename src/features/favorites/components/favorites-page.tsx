@@ -9,6 +9,7 @@ import { useFollows } from "@/stores/follows-store";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { FavoriteButton } from "@/features/dashboard/components/cards/favorite-button";
 import { Skeleton } from "@/components/common/skeleton";
+import { animePath } from "@/lib/site";
 
 export function FavoritesPage() {
   const following = useFollows((state) => state.following);
@@ -74,10 +75,10 @@ export function FavoritesPage() {
 function FavoriteCard({ anime }: { anime: AiringAnime }) {
   return (
     <article className="group relative flex h-[142px] gap-3 rounded-[12px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] p-2.5 transition hover:border-white/15">
-      <Link href={`/anime/${anime.id}`} className="relative aspect-[2/3] h-full shrink-0 overflow-hidden rounded-[7px] bg-[var(--fr-surface-2)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60">{anime.coverImage && <Image src={anime.coverImage} alt="" fill sizes="82px" className="object-cover transition duration-300 group-hover:scale-[1.025]" />}</Link>
+      <Link href={animePath(anime.id, anime.title)} className="relative aspect-[2/3] h-full shrink-0 overflow-hidden rounded-[7px] bg-[var(--fr-surface-2)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60">{anime.coverImage && <Image src={anime.coverImage} alt="" fill sizes="82px" className="object-cover transition duration-300 group-hover:scale-[1.025]" />}</Link>
       <div className="flex min-w-0 flex-1 flex-col py-0.5">
         <div className="flex items-start justify-between gap-2"><p className="text-[10px] uppercase tracking-[0.08em] text-[var(--fr-ink-muted)]">{anime.studio}</p><FavoriteButton animeId={anime.id} className="-mr-1 -mt-1 shrink-0" /></div>
-        <h2 className="mt-1.5 line-clamp-2 text-[14px] font-semibold leading-tight tracking-[-0.02em]"><Link href={`/anime/${anime.id}`}>{anime.title}</Link></h2>
+        <h2 className="mt-1.5 line-clamp-2 text-[14px] font-semibold leading-tight tracking-[-0.02em]"><Link href={animePath(anime.id, anime.title)}>{anime.title}</Link></h2>
         <p className="mt-2 text-[11px] text-[var(--fr-ink-muted)]">{anime.next ? `Airing · Episode ${anime.next.episode} next` : anime.totalEpisodes ? `${anime.totalEpisodes} episodes` : "Release information unavailable"}</p>
         <div className="mt-auto flex min-w-0 gap-1.5 pt-2">{anime.genres.slice(0, 2).map((genre) => <span key={genre} className="truncate rounded-[5px] bg-white/[0.05] px-2 py-1 text-[9px] text-[var(--fr-ink-muted)]">{genre}</span>)}</div>
       </div>

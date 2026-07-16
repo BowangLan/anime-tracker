@@ -7,7 +7,6 @@ import type { AiringAnime } from "@/lib/anilist";
 import { useNow } from "@/hooks/use-now";
 import { useAnimeSearch } from "@/features/dashboard/hooks/use-anime-search";
 import { SearchResults } from "@/features/dashboard/components/search/search-results";
-import { PageHeader } from "@/components/app-shell/page-header";
 import { DiscoveryCard } from "./discovery-card";
 import { cn } from "@/lib/utils";
 import {
@@ -58,13 +57,7 @@ export function DiscoverPage({ anime }: { anime: AiringAnime[] }) {
   );
 
   return (
-    <main className="min-h-full">
-      <PageHeader
-        eyebrow="Catalog"
-        title="Discover anime"
-        description="Search the full AniList catalog or filter the current airing season"
-      />
-
+    <div>
       <div>
         <div className="sticky top-14 z-30 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:px-8 lg:top-0 lg:px-7">
           <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
@@ -155,6 +148,6 @@ export function DiscoverPage({ anime }: { anime: AiringAnime[] }) {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

@@ -5,7 +5,18 @@ import { SchedulePage } from "@/features/schedule/components/schedule-page";
 import DashboardLoading from "@/features/dashboard/components/dashboard-loading";
 
 export const revalidate = 3600;
-export const metadata: Metadata = { title: "Schedule — Anime Tracker", description: "A timezone-aware weekly schedule for currently airing anime." };
+export const metadata: Metadata = {
+  title: "Weekly Anime Release Schedule",
+  description:
+    "See a timezone-aware weekly schedule for currently airing anime, including upcoming episode numbers and local release times.",
+  alternates: { canonical: "/schedule" },
+  openGraph: {
+    title: "Weekly Anime Release Schedule",
+    description:
+      "See upcoming anime episodes and local release times across the full week.",
+    url: "/schedule",
+  },
+};
 
 export default function Page() {
   return <Suspense fallback={<DashboardLoading />}><ScheduleData /></Suspense>;

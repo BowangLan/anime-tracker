@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { animePath } from "@/lib/site";
 import type { AiringAnime } from "@/lib/anilist";
 import { deriveAiring } from "@/lib/schedule";
 import { SectionHeader } from "./section-header";
@@ -32,7 +33,7 @@ export function FavoritesSection({
             <article key={show.id} className="group relative w-[138px] shrink-0 snap-start min-[810px]:w-[150px]">
               <FavoriteButton animeId={show.id} className="absolute right-2 top-2 z-10" />
               <Link
-                href={`/anime/${show.id}`}
+                href={animePath(show.id, show.title)}
                 className="block rounded-[15px] outline-none focus-visible:ring-1 focus-visible:ring-[var(--fr-accent-blue)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--fr-canvas)]"
               >
                 <div className="relative aspect-[4/5] overflow-hidden rounded-[15px] bg-[var(--fr-surface-1)]">

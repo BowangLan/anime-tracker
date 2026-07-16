@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { animePath } from "@/lib/site";
 import { CalendarClock, Play, Tv } from "lucide-react";
 import type { AiringAnime } from "@/lib/anilist";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,7 @@ export function AnimeShowCard({ entry, className, eager = false }: { entry: Show
   return (
     <article className={cn("group min-w-0", className)}>
       <Link
-        href={`/anime/${anime.id}`}
+        href={animePath(anime.id, anime.title)}
         className="block rounded-[15px] outline-none focus-visible:ring-1 focus-visible:ring-[var(--fr-accent-blue)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--fr-canvas)]"
       >
         <div className="relative aspect-[4/5] overflow-hidden rounded-[15px] bg-[var(--fr-surface-1)]">

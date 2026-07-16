@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { SoundProvider } from "@/providers/sound-provider";
 import { AppShell } from "@/components/app-shell/app-shell";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -10,9 +11,30 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Anime Tracker — follow your season",
+  metadataBase: SITE_URL,
+  title: {
+    default: "Anime Tracker — Current Anime Release Schedule",
+    template: `%s — ${SITE_NAME}`,
+  },
   description:
-    "A dashboard of currently airing anime organized by their weekly update day, with the latest episode and season progress. Live schedule from AniList.",
+    "Track currently airing anime, browse this season's releases, and see weekly episode schedules in your local timezone with live data from AniList.",
+  applicationName: SITE_NAME,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: SITE_NAME,
+    title: "Anime Tracker — Current Anime Release Schedule",
+    description:
+      "Track currently airing anime and see weekly episode schedules in your local timezone.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anime Tracker — Current Anime Release Schedule",
+    description:
+      "Track currently airing anime and see weekly episode schedules in your local timezone.",
+  },
 };
 
 export default function RootLayout({

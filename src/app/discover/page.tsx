@@ -2,12 +2,42 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { fetchAiringAnime } from "@/lib/anilist";
 import { DiscoverPage } from "@/features/discover/components/discover-page";
-import DashboardLoading from "@/features/dashboard/components/dashboard-loading";
+import { PageHeader } from "@/components/app-shell/page-header";
 
 export const revalidate = 3600;
-export const metadata: Metadata = { title: "Discover — Anime Tracker", description: "Browse the current anime season or search AniList’s full catalog." };
+export const metadata: Metadata = {
+  title: "Discover Current Anime",
+  description:
+    "Browse currently airing anime by genre, popularity, title, or next release, and search the complete AniList anime catalog.",
+  alternates: { canonical: "/discover" },
+  openGraph: {
+    title: "Discover Current Anime",
+    description:
+      "Browse this season's currently airing anime and search the complete AniList catalog.",
+    url: "/discover",
+  },
+};
 
-export default function Page() { return <Suspense fallback={<DashboardLoading />}><DiscoverData /></Suspense>; }
+export default function Page() {
+  return (
+    <main className="min-h-full">
+      <PageHeader
+        eyebrow="Catalog"
+        title="Discover current anime"
+        description="Search the full AniList catalog or filter the current airing season"
+      />
+      <Suspense
+        fallback={
+          <div className="grid min-h-[70vh] place-items-center text-sm text-[var(--fr-ink-muted)]">
+            Loading current anime…
+          </div>
+        }
+      >
+        <DiscoverData />
+      </Suspense>
+    </main>
+  );
+}
 
 async function DiscoverData() {
   const anime = await fetchAiringAnime().catch(() => null);

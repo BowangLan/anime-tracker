@@ -8,6 +8,7 @@
 // (see lib/schedule.ts) so the weekday reflects the *viewer's* timezone.
 
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday … 6 = Saturday
 
@@ -495,13 +496,12 @@ const DETAIL_QUERY = /* GraphQL */ `
  * Next.js only memoizes GET fetches, and this is a POST, so without this the
  * (large) query would run twice per request.
  */
-export const fetchAnimeDetail = cache(
+const fetchCachedAnimeDetail = unstable_cache(
   async (id: number): Promise<AnimeDetail | null> => {
     const res = await fetch("https://graphql.anilist.co", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ query: DETAIL_QUERY, variables: { id } }),
-      next: { revalidate: 3600 },
     });
 
     if (!res.ok) throw new Error(`AniList request failed: ${res.status} ${res.statusText}`);
@@ -513,7 +513,11 @@ export const fetchAnimeDetail = cache(
     if (json.errors?.length) throw new Error(json.errors[0].message);
     return json.data?.Media ?? null;
   },
+  ["anime-detail"],
+  { revalidate: 3600, tags: ["anime-detail"] },
 );
+
+export const fetchAnimeDetail = cache(fetchCachedAnimeDetail);
 
 function normalize(m: RawMedia): AiringAnime {
   const schedule = [...m.airingSchedule.nodes].sort((a, b) => a.episode - b.episode);

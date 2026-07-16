@@ -12,6 +12,7 @@ export default function AnimeDetailLoading() {
         showBackButton
         title="Loading anime…"
         description=""
+        headingLevel="div"
         action={<Skeleton className="h-8 w-24 rounded-[8px]" />}
       />
 

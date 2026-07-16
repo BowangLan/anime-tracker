@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { animePath } from "@/lib/site";
 import type { AiringAnime } from "@/lib/anilist";
 import { FavoriteButton } from "@/features/dashboard/components/cards/favorite-button";
 
@@ -17,7 +18,7 @@ export function DiscoveryCard({
         className="absolute right-2 top-2 z-10 bg-black/65 backdrop-blur"
       />
       <Link
-        href={`/anime/${anime.id}`}
+        href={animePath(anime.id, anime.title)}
         className="block rounded-[14px] outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60 focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--fr-canvas)]"
       >
         <div className="relative aspect-[2/3] overflow-hidden rounded-[14px] bg-[var(--fr-surface-1)]">

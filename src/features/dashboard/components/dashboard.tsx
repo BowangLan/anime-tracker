@@ -29,7 +29,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
     <main className="min-h-screen max-h-screen overflow-y-auto flex flex-col">
       <PageHeader
         eyebrow="Dashboard"
-        title="Home"
+        title="Current anime release schedule"
         description="Your currently airing season and followed shows"
       />
       {model == null ? (

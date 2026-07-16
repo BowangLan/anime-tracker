@@ -2,19 +2,39 @@ import { Suspense } from "react";
 import { fetchAiringAnime } from "@/lib/anilist";
 import { Dashboard } from "@/features/dashboard/components/dashboard";
 import DashboardLoading from "@/features/dashboard/components/dashboard-loading";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 // Statically generate and refresh hourly — airing schedules are stable within
 // an hour, and this keeps us well inside AniList's rate limits.
 export const revalidate = 3600;
 
 export default function Home() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE_URL.href}#website`,
+    url: SITE_URL.href,
+    name: SITE_NAME,
+    description:
+      "A timezone-aware tracker and weekly release schedule for currently airing anime.",
+    inLanguage: "en",
+  };
+
   // The fetch lives inside the suspended child (not here) so the static shell
   // and the loading fallback stream immediately; the board swaps in when the
   // AniList data resolves, instead of the whole document blocking on it.
   return (
-    <Suspense fallback={<DashboardLoading />}>
-      <Board />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <Suspense fallback={<DashboardLoading />}>
+        <Board />
+      </Suspense>
+    </>
   );
 }
 
