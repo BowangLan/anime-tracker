@@ -1,16 +1,59 @@
-import { cn } from "@/lib/utils";
+"use client";
 
-export function PageHeader({ eyebrow, title, description, action, className }: { eyebrow: string; title: string; description: string; action?: React.ReactNode; className?: string }) {
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ArrowLeftIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+export function PageHeader({
+  eyebrow,
+  title,
+  description,
+  action,
+  showBackButton = false,
+  className,
+}: {
+  // TODO: delete eyebrow
+  eyebrow?: string;
+  title: string;
+  description: string;
+  action?: React.ReactNode;
+  showBackButton?: boolean;
+  className?: string;
+}) {
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.back();
+  };
+
   return (
-    <header className={cn("flex min-h-[82px] flex-col gap-3 border-b border-[var(--fr-hairline-soft)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8 flex-none lg:px-7", className)}>
-      <div className="min-w-0 max-w-3xl">
-        <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--fr-ink-muted)]">{eyebrow}</p>
-        <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3">
-          <h1 className="shrink-0 text-[21px] font-semibold leading-tight tracking-[-0.035em] text-[var(--fr-ink)]">{title}</h1>
-          <p className="truncate text-[12px] text-[var(--fr-ink-muted)]">{description}</p>
-        </div>
+    <header
+      className={cn(
+        "flex h-14 gap-3 border-b border-[var(--fr-hairline-soft)] px-5 flex-row sm:items-center sm:justify-between sm:px-7 flex-none",
+        className,
+      )}
+    >
+      <div className="flex items-center gap-2 relative flex-1">
+        {showBackButton && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="flex-none"
+            onClick={handleBack}
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+          </Button>
+        )}
+
+        <h1 className="shrink-0 text-sm font-medium leading-tight text-[var(--fr-ink)] flex-1 truncate max-w-xs left-1/2 -translate-x-1/2 absolute sm:relative sm:translate-x-0 sm:left-auto sm:max-w-full inline-flex">
+          {title}
+        </h1>
+
+        <div className="flex-1"></div>
+
+        {action && <div className="shrink-0">{action}</div>}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
     </header>
   );
 }

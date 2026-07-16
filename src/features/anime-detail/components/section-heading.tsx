@@ -8,14 +8,14 @@ export function SectionHeading({
   title: string;
 }) {
   return (
-    <div>
-      <p className="fr-eyebrow">{eyebrow}</p>
+    <div className="flex items-end justify-between gap-4 border-b border-white/8 pb-3">
       <h2
         id={id}
-        className="mt-1.5 text-[clamp(1.65rem,3vw,2.5rem)] font-semibold leading-none tracking-[-0.045em]"
+        className="scroll-mt-28 text-[18px] font-semibold tracking-[-0.025em]"
       >
         {title}
       </h2>
+      <p className="shrink-0 text-[10px] uppercase tracking-[0.08em] text-white/35">{eyebrow}</p>
     </div>
   );
 }

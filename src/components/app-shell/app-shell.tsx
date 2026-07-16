@@ -5,7 +5,6 @@ import { AppNavigation } from "./app-navigation";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  if (pathname.startsWith("/anime/")) return <>{children}</>;
   const locksViewport = pathname === "/schedule";
 
   return (

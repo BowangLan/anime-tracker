@@ -12,7 +12,7 @@ export function DetailAside({
   const links = anime.externalLinks.filter((link) => !link.isDisabled);
 
   return (
-    <aside className="space-y-8 lg:sticky lg:top-6 lg:self-start">
+    <aside className="space-y-8 lg:sticky lg:top-16 lg:self-start">
       <FactPanel anime={anime} mainStudio={mainStudio} />
 
       {anime.rankings.length > 0 && (
