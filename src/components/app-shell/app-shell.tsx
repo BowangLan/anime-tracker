@@ -5,7 +5,10 @@ import { AppNavigation } from "./app-navigation";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const locksViewport = pathname === "/schedule" || pathname === "/favorites";
+  const locksViewport =
+    pathname === "/schedule" ||
+    pathname === "/favorites" ||
+    pathname === "/discover";
 
   return (
     <div

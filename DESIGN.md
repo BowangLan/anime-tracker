@@ -21,6 +21,7 @@ colors:
   gradient-orange: "#ff7a3d"
   gradient-coral: "#ff5577"
   semantic-success: "#22c55e"
+  semantic-favorite: "#facc15"
 
 typography:
   display-xxl:
@@ -292,6 +293,8 @@ Body type is **Inter Variable**, with Framer leaning hard into Inter's character
 
 ### Semantic
 - **Success Green** ({colors.semantic-success}): Pricing comparison-table checkmarks. Glyph fill, not surface.
+- **Airing / Next Upcoming** ({colors.primary}): Always use the primary color for UI that indicates a show or episode is currently airing or is the next upcoming release. This applies to status labels, badges, icons, timeline markers, countdown emphasis, and other related indicators.
+- **Favorite Yellow** ({colors.semantic-favorite}, Tailwind `yellow-400`): Always use this color for favorite-related UI, including favorite buttons, icons, badges, and active favorite states.
 
 ### Brand Gradient (signature)
 - **Gradient Magenta** ({colors.gradient-magenta}): Spotlight card variant.
@@ -480,6 +483,8 @@ The defining decorative surface of Framer's marketing — oversized atmospheric 
 ### Do
 
 - Reserve `{colors.primary}` (white) and `{colors.canvas}` (near-black) as the system's two anchor surfaces. Every band of the page chooses one or the other.
+- Always use `{colors.primary}` for UI that communicates a show or episode is currently airing or is the next upcoming release.
+- Always use `{colors.semantic-favorite}` (Tailwind `yellow-400`) for favorite-related UI.
 - Push display-size letter-spacing aggressively negative — `{typography.display-xxl}` at -5.5px is the brand signature, not a stylistic accident.
 - Use `{colors.accent-blue}` only for hyperlinks, focus rings, and selected indicators. Never as a background or button fill.
 - Drop one or two `gradient-spotlight-card` variants into a card grid; they are the brand's atmosphere device. Don't overdo it — three or more in the same viewport reads as a moodboard, not a system.
