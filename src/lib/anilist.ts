@@ -52,6 +52,10 @@ export interface AiringAnime {
   studio: string;
   genres: string[];
   synopsis: string;
+  /** Optional AniList discovery signals, queried only by curated surfaces. */
+  averageScore?: number | null;
+  popularity?: number;
+  trending?: number;
   siteUrl: string;
   /** Official, streaming, and social links supplied by AniList. */
   externalLinks: AnimeExternalLink[];
@@ -70,6 +74,14 @@ export interface AnimeSearchResult extends AiringAnime {
   seasonYear: number | null;
   averageScore: number | null;
   popularity: number;
+}
+
+/** Curated, independently-ranked rails for the Discover page. */
+export interface DiscoverSections {
+  trending: AiringAnime[];
+  popular: AiringAnime[];
+  upcoming: AiringAnime[];
+  hiddenGems: AiringAnime[];
 }
 
 type Season = "WINTER" | "SPRING" | "SUMMER" | "FALL";
@@ -162,13 +174,97 @@ const FAVORITES_QUERY = /* GraphQL */ `
   }
 `;
 
+// Each alias answers a different discovery question in one round trip:
+// momentum, durable popularity, immediate availability, and underseen quality.
+const DISCOVER_QUERY = /* GraphQL */ `
+  fragment DiscoverMedia on Media {
+    id
+    isAdult
+    season
+    seasonYear
+    title { romaji english }
+    coverImage { extraLarge large color }
+    episodes
+    genres
+    averageScore
+    popularity
+    trending
+    siteUrl
+    externalLinks { id url site siteId type language color icon notes isDisabled }
+    description(asHtml: false)
+    studios(isMain: true) { nodes { name } }
+    nextAiringEpisode { episode airingAt }
+    airingSchedule(perPage: 60) { nodes { episode airingAt } }
+  }
+
+  query DiscoverAnime(
+    $season: MediaSeason!
+    $year: Int!
+    $now: Int!
+    $until: Int!
+  ) {
+    trending: Page(page: 1, perPage: 12) {
+      media(
+        season: $season
+        seasonYear: $year
+        type: ANIME
+        status: RELEASING
+        isAdult: false
+        sort: [TRENDING_DESC, POPULARITY_DESC]
+      ) { ...DiscoverMedia }
+    }
+
+    popular: Page(page: 1, perPage: 36) {
+      media(
+        season: $season
+        seasonYear: $year
+        type: ANIME
+        status: RELEASING
+        isAdult: false
+        sort: [POPULARITY_DESC]
+      ) { ...DiscoverMedia }
+    }
+
+    upcoming: Page(page: 1, perPage: 50) {
+      airingSchedules(
+        airingAt_greater: $now
+        airingAt_lesser: $until
+        sort: [TIME]
+      ) {
+        episode
+        airingAt
+        media { ...DiscoverMedia }
+      }
+    }
+
+    hiddenGems: Page(page: 1, perPage: 36) {
+      media(
+        season: $season
+        seasonYear: $year
+        type: ANIME
+        status: RELEASING
+        isAdult: false
+        averageScore_greater: 67
+        popularity_lesser: 25000
+        sort: [SCORE_DESC, TRENDING_DESC]
+      ) { ...DiscoverMedia }
+    }
+  }
+`;
+
 // Shape of the slice of the AniList response we actually read.
 interface RawMedia {
   id: number;
+  isAdult?: boolean;
+  season?: Season | null;
+  seasonYear?: number | null;
   title: { romaji: string | null; english: string | null };
   coverImage: { extraLarge: string | null; large: string | null; color: string | null };
   episodes: number | null;
   genres: string[];
+  averageScore?: number | null;
+  popularity?: number;
+  trending?: number;
   siteUrl: string;
   externalLinks: AnimeExternalLink[];
   description: string | null;
@@ -185,6 +281,12 @@ interface RawSearchMedia extends RawMedia {
   seasonYear: number | null;
   averageScore: number | null;
   popularity: number;
+}
+
+interface RawAiringSchedule {
+  episode: number;
+  airingAt: number;
+  media: RawMedia | null;
 }
 
 /** Strip AniList's HTML description down to readable plain text. */
@@ -530,6 +632,9 @@ function normalize(m: RawMedia): AiringAnime {
     studio: m.studios.nodes[0]?.name ?? "Unknown studio",
     genres: m.genres,
     synopsis: plainText(m.description),
+    averageScore: m.averageScore,
+    popularity: m.popularity,
+    trending: m.trending,
     siteUrl: m.siteUrl,
     externalLinks: m.externalLinks.filter((link) => !link.isDisabled),
     next: m.nextAiringEpisode,
@@ -616,6 +721,67 @@ export async function fetchFavoriteAnime(ids: number[]): Promise<AiringAnime[]> 
     const anime = byId.get(id);
     return anime ? [anime] : [];
   });
+}
+
+/** Fetch the independently-ranked rails used by Discover in one API request. */
+export async function fetchDiscoverSections(now = new Date()): Promise<DiscoverSections> {
+  const { season, year } = currentSeason(now);
+  const nowSeconds = Math.floor(now.getTime() / 1000);
+  const untilSeconds = nowSeconds + 48 * 60 * 60;
+
+  const res = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      query: DISCOVER_QUERY,
+      variables: { season, year, now: nowSeconds, until: untilSeconds },
+    }),
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) {
+    throw new Error(`AniList discovery request failed: ${res.status} ${res.statusText}`);
+  }
+
+  const json = (await res.json()) as {
+    data?: {
+      trending?: { media: RawMedia[] };
+      popular?: { media: RawMedia[] };
+      upcoming?: { airingSchedules: RawAiringSchedule[] };
+      hiddenGems?: { media: RawMedia[] };
+    };
+    errors?: { message: string }[];
+  };
+  if (json.errors?.length) throw new Error(json.errors[0].message);
+
+  const seen = new Set<number>();
+  const takeUnique = (candidates: AiringAnime[], limit: number) => {
+    const result: AiringAnime[] = [];
+    for (const anime of candidates) {
+      if (seen.has(anime.id)) continue;
+      seen.add(anime.id);
+      result.push(anime);
+      if (result.length === limit) break;
+    }
+    return result;
+  };
+
+  const upcoming = (json.data?.upcoming?.airingSchedules ?? []).flatMap((airing) => {
+    if (
+      !airing.media ||
+      airing.media.isAdult ||
+      airing.media.season !== season ||
+      airing.media.seasonYear !== year
+    ) return [];
+    return [{ ...normalize(airing.media), next: { episode: airing.episode, airingAt: airing.airingAt } }];
+  });
+
+  return {
+    trending: takeUnique((json.data?.trending?.media ?? []).map(normalize), 6),
+    popular: takeUnique((json.data?.popular?.media ?? []).map(normalize), 16),
+    upcoming: takeUnique(upcoming, 16),
+    hiddenGems: takeUnique((json.data?.hiddenGems?.media ?? []).map(normalize), 12),
+  };
 }
 
 /** Fetch a single popularity-sorted page of the current season's airing shows. */
