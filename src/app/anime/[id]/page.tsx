@@ -182,7 +182,7 @@ export default async function AnimeDetailPage({ params }: DetailPageProps) {
 
         <div
           id="overview"
-          className="mx-auto grid max-w-[1180px] scroll-mt-24 gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_260px] lg:px-8 lg:py-10"
+          className="mx-auto grid max-w-[1180px] scroll-mt-24 gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_260px] px-5 sm:px-8 lg:py-10"
         >
           <div className="min-w-0 space-y-10">
             <Synopsis anime={anime} />
