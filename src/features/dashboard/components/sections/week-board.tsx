@@ -5,6 +5,7 @@ import { dayLabel, type BoardModel } from "@/features/dashboard/lib/board-model"
 import { AnimeCard } from "../cards/anime-card";
 import { EmptyState } from "../empty-state";
 import { SectionHeader } from "./section-header";
+import { episodeOnLocalDate } from "@/lib/schedule";
 
 const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
   month: "short",
@@ -88,7 +89,13 @@ export function WeekBoard({
                       </p>
                     ) : (
                       entries.map((e) => (
-                        <AnimeCard key={e.anime.id} anime={e.anime} airing={e.airing} now={now} />
+                        <AnimeCard
+                          key={e.anime.id}
+                          anime={e.anime}
+                          airing={e.airing}
+                          now={now}
+                          episode={episodeOnLocalDate(e.anime.schedule, date)}
+                        />
                       ))
                     )}
                   </div>

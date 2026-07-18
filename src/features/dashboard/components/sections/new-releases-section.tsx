@@ -19,7 +19,7 @@ export function NewReleasesSection({ anime, now }: { anime: AiringAnime[]; now: 
   const releases: ShowCardData[] = anime.flatMap((show) => {
     const episode = show.schedule.findLast((item) => sameLocalDay(item.airingAt, now));
     return episode
-      ? [{ anime: show, episode: episode.episode, releaseLabel: `Today · ${timeLabel(episode.airingAt)}` }]
+      ? [{ anime: show, episode: episode.episode, releaseLabel: `Today · ${timeLabel(episode.airingAt)}`, isPast: episode.airingAt * 1000 <= now }]
       : [];
   });
 

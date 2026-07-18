@@ -12,6 +12,7 @@ import { FavoritesSection } from "./sections/favorites-section";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { AnimeCard } from "./cards/anime-card";
 import { SectionHeader } from "./sections/section-header";
+import { episodeOnLocalDate } from "@/lib/schedule";
 
 const TODAY_GRID_ROWS = 3;
 
@@ -57,6 +58,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
                       anime={entry.anime}
                       airing={entry.airing}
                       now={now!}
+                      episode={episodeOnLocalDate(entry.anime.schedule, new Date(now!))}
                     />
                   ))}
                 </div>

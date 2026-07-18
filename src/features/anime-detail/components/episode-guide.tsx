@@ -1,7 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import { Play } from "lucide-react";
 import type { AnimeDetail } from "@/lib/anilist";
 import { SectionHeading } from "./section-heading";
+import { WatchedButton } from "@/components/common/watched-button";
+import { useWatchedEpisodes } from "@/hooks/use-watched-episodes";
+import { cn } from "@/lib/utils";
 
 interface EpisodeRow {
   number: number;
@@ -9,11 +14,12 @@ interface EpisodeRow {
   url: string | null;
   site: string | null;
   airingAt: number | null;
-  isUpcoming: boolean;
+  state: "past" | "upcoming" | "unknown";
 }
 
 export function EpisodeGuide({ anime }: { anime: AnimeDetail }) {
   const episodes = buildEpisodeRows(anime);
+  const { isWatched } = useWatchedEpisodes(anime.id);
   if (episodes.length === 0) return null;
 
   return (
@@ -23,11 +29,15 @@ export function EpisodeGuide({ anime }: { anime: AnimeDetail }) {
         eyebrow={`${episodes.length}${anime.episodes && episodes.length < anime.episodes ? ` of ${anime.episodes}` : ""} episodes`}
         title="Episode guide"
       />
+      <p className="mt-2 text-[11px] text-white/48">Watch progress is saved in this browser.</p>
       <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
         {episodes.map((episode) => {
-          const future = episode.isUpcoming;
-          const content = (
-            <>
+          const future = episode.state === "upcoming";
+          const past = episode.state === "past";
+          const watched = isWatched(episode.number);
+          const needsAttention = anime.status === "RELEASING" && past && !watched;
+          return (
+            <div key={episode.number} className="group block min-w-0 rounded-[12px]">
               <span className="relative block aspect-video overflow-hidden rounded-[12px] bg-white/[0.04]">
                 <Image
                   src={anime.bannerImage || anime.coverImage.extraLarge || anime.coverImage.large}
@@ -41,34 +51,35 @@ export function EpisodeGuide({ anime }: { anime: AnimeDetail }) {
                   {String(episode.number).padStart(2, "0")}
                 </span>
                 {episode.url ? (
-                  <span className="absolute bottom-3 right-3 grid h-8 w-8 place-items-center rounded-full bg-white text-black shadow-lg transition group-hover:scale-105">
+                  <a href={episode.url} target="_blank" rel="noreferrer" aria-label={`Watch ${episode.title || `episode ${episode.number}`} on ${episode.site || "streaming site"}`} className="absolute bottom-3 right-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-white text-black shadow-lg transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--detail-accent)]">
                     <Play className="ml-0.5 h-3 w-3 fill-current" />
-                  </span>
+                  </a>
                 ) : future ? (
                   <span className="absolute right-2.5 top-2.5 rounded-full border border-white/15 bg-black/55 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/75 backdrop-blur-sm">
                     Upcoming
                   </span>
                 ) : null}
+                {!future && (
+                  <WatchedButton
+                    animeId={anime.id}
+                    episode={episode.number}
+                    className="absolute right-2.5 top-2.5"
+                  />
+                )}
               </span>
               <span className="mt-3 block min-w-0 px-0.5">
-                <span className="block truncate text-[13px] font-medium text-white/85 transition group-hover:text-white">
+                <span className={cn("block truncate text-[13px] text-white/85 transition group-hover:text-white", needsAttention ? "font-bold" : "font-medium")}>
                   {episode.title || `Episode ${episode.number}`}
                 </span>
-                <span className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-white/38">
+                <span className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-white/52">
+                  <span className={cn(needsAttention && "font-bold text-white/75")}>
+                    {watched ? "Watched" : future ? "Upcoming" : past ? "Unwatched · Aired" : "Air date unavailable"}
+                  </span>
                   {episode.airingAt && <span>{future ? "Airs" : "Aired"} {episodeDate(episode.airingAt)}</span>}
                   {episode.site && <span>{episode.site}</span>}
                 </span>
               </span>
-            </>
-          );
-
-          const cardClass = "group block min-w-0 rounded-[12px] outline-none focus-visible:ring-2 focus-visible:ring-[var(--detail-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-black";
-          return episode.url ? (
-            <a key={episode.number} href={episode.url} target="_blank" rel="noreferrer" className={cardClass} aria-label={`Watch ${episode.title || `episode ${episode.number}`} on ${episode.site || "streaming site"}`}>
-              {content}
-            </a>
-          ) : (
-            <div key={episode.number} className={cardClass}>{content}</div>
+            </div>
           );
         })}
       </div>
@@ -88,7 +99,7 @@ function buildEpisodeRows(anime: AnimeDetail): EpisodeRow[] {
       url: stream.url,
       site: stream.site,
       airingAt: null,
-      isUpcoming: false,
+      state: "past",
     });
   }
 
@@ -100,13 +111,22 @@ function buildEpisodeRows(anime: AnimeDetail): EpisodeRow[] {
       url: existing?.url ?? null,
       site: existing?.site ?? null,
       airingAt: scheduled.airingAt,
-      isUpcoming: scheduled.timeUntilAiring > 0,
+      state: scheduled.timeUntilAiring > 0 ? "upcoming" : "past",
     });
   }
 
   if (anime.episodes && anime.episodes <= 100) {
     for (let number = 1; number <= anime.episodes; number++) {
-      if (!rows.has(number)) rows.set(number, { number, title: null, url: null, site: null, airingAt: null, isUpcoming: false });
+      if (!rows.has(number)) rows.set(number, {
+        number,
+        title: null,
+        url: null,
+        site: null,
+        airingAt: null,
+        state: anime.nextAiringEpisode != null
+          ? number >= anime.nextAiringEpisode.episode ? "upcoming" : "past"
+          : anime.status === "FINISHED" ? "past" : "unknown",
+      });
     }
   }
 

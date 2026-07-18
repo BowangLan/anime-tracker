@@ -53,6 +53,31 @@ export function deriveAiring(a: AiringAnime, nowMs: number): Airing {
   };
 }
 
+/** The single scheduled episode occurrence on a viewer-local calendar date. */
+export function episodeOnLocalDate(
+  schedule: EpisodeAiring[],
+  date: Date,
+): EpisodeAiring | null {
+  return schedule.find((episode) => {
+    const airingDate = new Date(episode.airingAt * 1000);
+    return airingDate.getFullYear() === date.getFullYear()
+      && airingDate.getMonth() === date.getMonth()
+      && airingDate.getDate() === date.getDate();
+  }) ?? null;
+}
+
+/** Every reliably scheduled episode that has aired and is not marked watched. */
+export function unwatchedAiredEpisodes(
+  schedule: EpisodeAiring[],
+  watched: ReadonlySet<number>,
+  nowMs: number,
+): EpisodeAiring[] {
+  return schedule.filter(
+    (episode) => episode.airingAt * 1000 <= nowMs
+      && !watched.has(episode.episode),
+  );
+}
+
 /** "3d 4h", "6h 12m", "12m", or "now". */
 export function untilLabel(targetMs: number, nowMs: number): string {
   let s = Math.floor((targetMs - nowMs) / 1000);
