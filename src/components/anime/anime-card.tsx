@@ -9,7 +9,7 @@ const animeCardVariants = cva("group/anime-card relative min-w-0", {
   variants: {
     layout: {
       poster: "flex flex-col",
-      compact: "flex min-h-32 gap-3 p-2.5",
+      compact: "flex min-h-32 items-start gap-3 p-2.5",
       panel: "flex h-[152px] gap-3 overflow-hidden p-2.5",
       row: "grid items-center gap-3",
     },
@@ -127,7 +127,7 @@ const animeCardBodyVariants = cva("min-w-0", {
   variants: {
     layout: {
       poster: "pt-3",
-      compact: "flex flex-1 flex-col py-0.5",
+      compact: "flex flex-1 self-stretch flex-col py-0.5",
       panel: "flex flex-1 flex-col py-0.5",
       row: "",
     },
