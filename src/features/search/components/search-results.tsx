@@ -1,7 +1,6 @@
-import { AlertCircle, Radio } from "lucide-react";
+import { AlertCircle, Radio, SearchX } from "lucide-react";
 import type { AnimeSearchResult } from "@/lib/anilist";
 import type { SearchState } from "@/features/search/hooks/use-anime-search";
-import { EmptyState } from "@/features/dashboard/components/empty-state";
 import { SearchResultCard } from "./search-result-card";
 import { SearchResultsSkeleton } from "./search-results-skeleton";
 import { AnimeCardList } from "@/components/anime/anime-card";
@@ -46,7 +45,24 @@ export function SearchResults({
           <p className="max-w-sm text-[13px] text-[var(--fr-ink-muted)]">{error}</p>
         </div>
       ) : results.length === 0 ? (
-        <EmptyState onlyFollowing={false} hasQuery onClear={onClear} />
+        <div className="flex flex-col items-center justify-center gap-4 rounded-[16px] border border-dashed border-[var(--fr-hairline)] py-20 text-center">
+          <div className="grid h-14 w-14 place-items-center rounded-full bg-[var(--fr-surface-1)]">
+            <SearchX className="h-6 w-6 text-[var(--fr-ink-muted)]" aria-hidden="true" />
+          </div>
+          <div className="max-w-xs">
+            <p className="text-[15px] font-medium text-[var(--fr-ink)]">No anime found</p>
+            <p className="mt-1 text-[13px] text-[var(--fr-ink-muted)]">
+              Try a different title, alternate spelling, or fewer keywords.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClear}
+            className="rounded-full bg-[var(--fr-surface-2)] px-4 py-2 text-[13px] font-medium text-[var(--fr-ink)] outline-none transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]"
+          >
+            Clear search
+          </button>
+        </div>
       ) : (
         <>
           {releasingCount > 0 && (
