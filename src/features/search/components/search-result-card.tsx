@@ -12,13 +12,7 @@ import {
 } from "@/components/anime/anime-card";
 import { StarRating } from "@/components/common/star-rating";
 
-export function SearchResultCard({
-  anime,
-  now,
-}: {
-  anime: AnimeSearchResult;
-  now: number;
-}) {
+export function SearchResultCard({ anime, now }: { anime: AnimeSearchResult; now: number }) {
   const airing = deriveAiring(anime, now);
   const isReleasing = anime.status === "RELEASING";
   const countdown = airing.nextAiringAt ? untilLabel(airing.nextAiringAt, now) : null;

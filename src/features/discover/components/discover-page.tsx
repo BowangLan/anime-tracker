@@ -2,13 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Clock3, Search, X } from "lucide-react";
+import { ChevronRight, Clock3 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import type { AiringAnime, DiscoverSections } from "@/lib/anilist";
 import { animePath } from "@/lib/site";
 import { useNow } from "@/hooks/use-now";
-import { useAnimeSearch } from "@/features/dashboard/hooks/use-anime-search";
-import { SearchResults } from "@/features/dashboard/components/search/search-results";
 import { FavoriteButton } from "@/features/dashboard/components/cards/favorite-button";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { cn } from "@/lib/utils";
@@ -214,7 +212,6 @@ function formatAiringTime(airingAt: number | undefined, now: number | null) {
 
 export function DiscoverPage({ sections }: { sections: DiscoverSections }) {
   const now = useNow();
-  const search = useAnimeSearch();
   const searchParams = useSearchParams();
   const selectedGenre = searchParams.get("genre") ?? "All";
   const setGenre = (genre: string) => {
@@ -240,28 +237,20 @@ export function DiscoverPage({ sections }: { sections: DiscoverSections }) {
       <PageHeader
         eyebrow="Catalog"
         title="Discover current anime"
-        description="Search the full AniList catalog or filter the current airing season"
+        description="Browse curated picks from the current airing season"
       />
       <header className="z-30 shrink-0 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:px-8 lg:px-7">
-        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
-          <div className="relative min-w-0 flex-1 sm:max-w-md">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fr-ink-muted)]" />
-            <input value={search.query} onChange={(event) => search.updateQuery(event.target.value)} placeholder="Search title, studio, or keyword" aria-label="Search anime titles" className="h-11 w-full rounded-[10px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] pl-10 pr-10 text-sm outline-none placeholder:text-[var(--fr-ink-muted)] focus:ring-2 focus:ring-[var(--fr-accent-blue)]/40 sm:h-9 sm:rounded-[8px] sm:pl-9 sm:pr-9 sm:text-[12px]" />
-            {search.isSearching && <button type="button" onClick={search.clearSearch} aria-label="Clear search" className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-[var(--fr-ink-muted)] hover:bg-white/10 hover:text-white"><X className="h-3.5 w-3.5" /></button>}
-          </div>
-          {!search.isSearching && (
-            <span className="shrink-0 text-xs tabular-nums text-[var(--fr-ink-muted)] sm:text-[11px]">{visibleCount} curated picks</span>
-          )}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-[var(--fr-ink-muted)] sm:text-[11px]">Filter by genre</span>
+          <span className="shrink-0 text-xs tabular-nums text-[var(--fr-ink-muted)] sm:text-[11px]">{visibleCount} curated picks</span>
         </div>
-        {!search.isSearching && <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-0.5 sm:-mx-8 sm:px-8 lg:-mx-7 lg:px-7">{featuredGenres.map((genre) => <button key={genre} type="button" onClick={() => setGenre(genre)} className={cn("shrink-0 rounded-full border px-3 py-1.5 text-[11px] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60", genre === selectedGenre ? "border-white bg-white font-medium text-black" : "border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] text-[var(--fr-ink-muted)] hover:text-white")}>{genre}</button>)}</div>}
+        <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-0.5 sm:-mx-8 sm:px-8 lg:-mx-7 lg:px-7">{featuredGenres.map((genre) => <button key={genre} type="button" onClick={() => setGenre(genre)} className={cn("shrink-0 rounded-full border px-3 py-1.5 text-[11px] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60", genre === selectedGenre ? "border-white bg-white font-medium text-black" : "border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] text-[var(--fr-ink-muted)] hover:text-white")}>{genre}</button>)}</div>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
-        {search.isSearching ? <SearchResults results={search.results} query={search.searchQuery} now={now ?? 0} state={search.state} error={search.error} onClear={search.clearSearch} /> : (
-          <div className="space-y-10 px-4 py-6 sm:space-y-12 sm:px-8 sm:py-8 lg:px-7">
-            {visibleCount ? <>{filtered.trending.length > 0 && <FeatureRail anime={filtered.trending} />}{filtered.popular.length > 0 && <PosterRail anime={filtered.popular} />}{filtered.upcoming.length > 0 && <EpisodeRail anime={filtered.upcoming} now={now} />}{filtered.hiddenGems.length > 0 && <StoryRail anime={filtered.hiddenGems} />}</> : <div className="grid min-h-64 place-items-center text-center"><div><p className="text-lg font-medium">No curated picks in {selectedGenre}</p><button type="button" onClick={() => setGenre("All")} className="mt-2 text-sm text-[var(--fr-accent-blue)] hover:underline">Browse every genre</button></div></div>}
-          </div>
-        )}
+        <div className="space-y-10 px-4 py-6 sm:space-y-12 sm:px-8 sm:py-8 lg:px-7">
+          {visibleCount ? <>{filtered.trending.length > 0 && <FeatureRail anime={filtered.trending} />}{filtered.popular.length > 0 && <PosterRail anime={filtered.popular} />}{filtered.upcoming.length > 0 && <EpisodeRail anime={filtered.upcoming} now={now} />}{filtered.hiddenGems.length > 0 && <StoryRail anime={filtered.hiddenGems} />}</> : <div className="grid min-h-64 place-items-center text-center"><div><p className="text-lg font-medium">No curated picks in {selectedGenre}</p><button type="button" onClick={() => setGenre("All")} className="mt-2 text-sm text-[var(--fr-accent-blue)] hover:underline">Browse every genre</button></div></div>}
+        </div>
       </div>
     </main>
   );
