@@ -16,9 +16,9 @@ export function SearchResultsPage() {
 
   return (
     <main className="flex h-full min-h-0 flex-col overflow-hidden">
-      <PageHeader title="Search" description="Search the complete AniList catalog" showBackButton headingLevel="div" />
+      <PageHeader title="Search results" description={`Results for ${query}`} showBackButton />
       <div className="shrink-0 border-b border-[var(--fr-hairline-soft)] px-4 py-3 sm:px-7">
-        <div className="max-w-2xl">
+        <div className="mr-auto w-full max-w-2xl">
           <SearchForm key={query} initialQuery={query} />
         </div>
       </div>
