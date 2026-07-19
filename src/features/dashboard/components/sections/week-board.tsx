@@ -58,7 +58,7 @@ export function WeekBoard({
               return (
                 <section
                   key={day}
-                  className="flex h-full min-h-0 w-[272px] shrink-0 flex-col overflow-hidden"
+                  className="flex h-full min-h-0 w-[340px] shrink-0 flex-col overflow-hidden"
                 >
                   <div
                     className={cn(
@@ -95,6 +95,7 @@ export function WeekBoard({
                           airing={e.airing}
                           now={now}
                           episode={episodeOnLocalDate(e.anime.schedule, date)}
+                          density="roomy"
                         />
                       ))
                     )}
