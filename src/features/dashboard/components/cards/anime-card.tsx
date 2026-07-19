@@ -35,12 +35,14 @@ export function AnimeCard({
   now,
   episode,
   density = "compact",
+  showStudio = true,
 }: {
   anime: AiringAnime;
   airing: Airing;
   now: number;
   episode: EpisodeAiring | null;
   density?: "compact" | "roomy";
+  showStudio?: boolean;
 }) {
   const total = anime.totalEpisodes;
   const countdown =
@@ -92,7 +94,9 @@ export function AnimeCard({
           </AnimeCardActions>
         </AnimeCardHeader>
 
-        <AnimeCardDescription className="mt-0">{anime.studio}</AnimeCardDescription>
+        {showStudio && (
+          <AnimeCardDescription className="mt-0">{anime.studio}</AnimeCardDescription>
+        )}
 
         {/* Status line + monochrome season progress */}
         <div className="mt-auto space-y-1.5 pt-1.5">

@@ -96,6 +96,7 @@ export function WeekBoard({
                           now={now}
                           episode={episodeOnLocalDate(e.anime.schedule, date)}
                           density="roomy"
+                          showStudio={false}
                         />
                       ))
                     )}
