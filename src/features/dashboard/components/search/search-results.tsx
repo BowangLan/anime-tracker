@@ -4,6 +4,7 @@ import type { SearchState } from "@/features/dashboard/hooks/use-anime-search";
 import { EmptyState } from "../empty-state";
 import { SearchResultCard } from "./search-result-card";
 import { SearchResultsSkeleton } from "./search-results-skeleton";
+import { AnimeCardList } from "@/components/anime/anime-card";
 
 export function SearchResults({
   results,
@@ -27,10 +28,7 @@ export function SearchResults({
       <div className="mb-5 flex items-end justify-between gap-4 border-b border-[var(--fr-hairline-soft)] pb-4">
         <div className="min-w-0">
           <p className="fr-eyebrow">Search results</p>
-          <h2
-            className="mt-1 truncate text-[22px] font-semibold text-[var(--fr-ink)]"
-            style={{ letterSpacing: "-0.035em" }}
-          >
+          <h2 className="mt-1 truncate text-[22px] font-semibold tracking-[-0.035em] text-[var(--fr-ink)]">
             &ldquo;{query}&rdquo;
           </h2>
         </div>
@@ -59,11 +57,11 @@ export function SearchResults({
               Airing titles are ranked first
             </div>
           )}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <AnimeCardList layout="compactGrid">
             {results.map((anime) => (
               <SearchResultCard key={anime.id} anime={anime} now={now} />
             ))}
-          </div>
+          </AnimeCardList>
         </>
       )}
     </section>

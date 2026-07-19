@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { animePath } from "@/lib/site";
 import { Clock } from "lucide-react";
 import type { AiringAnime, EpisodeAiring } from "@/lib/anilist";
@@ -10,6 +8,16 @@ import {
   untilLabel,
 } from "@/lib/schedule";
 import { cn } from "@/lib/utils";
+import {
+  AnimeCard as AnimeCardRoot,
+  AnimeCardActions,
+  AnimeCardBody,
+  AnimeCardDescription,
+  AnimeCardHeader,
+  AnimeCardMedia,
+  AnimeCardMeta,
+  AnimeCardTitle,
+} from "@/components/anime/anime-card";
 import { ExternalLinksMenu } from "./external-links-menu";
 import { FavoriteButton } from "./favorite-button";
 import { WatchedButton } from "@/components/common/watched-button";
@@ -40,64 +48,44 @@ export function AnimeCard({
     useAnimeWatchProgress(anime.id, anime.schedule, now);
   const episodeIsPast = episode != null && episode.airingAt * 1000 <= now;
   const episodeWatched = episode != null && isWatched(episode.episode);
+  const href = animePath(anime.id, anime.title);
 
   return (
-    <article
-      className={cn(
-        "group relative flex gap-3 rounded-[14px] border bg-[var(--fr-surface-1)] p-2.5 transition-colors hover:bg-[var(--fr-surface-2)]/60",
-        needsAttention
-          ? "border-foreground/30 hover:border-foreground/60"
-          : "border-[var(--fr-hairline)] hover:border-foreground/15",
-      )}
+    <AnimeCardRoot
+      layout="compact"
+      surface="outlined"
+      emphasis={needsAttention ? "attention" : "default"}
     >
-      <Link
-        href={animePath(anime.id, anime.title)}
-        className="relative aspect-[2/3] w-[54px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--fr-surface-2)]"
-      >
-        {anime.coverImage && (
-          <Image
-            src={anime.coverImage}
-            alt=""
-            fill
-            sizes="54px"
-            className="object-cover"
-          />
-        )}
-      </Link>
+      <AnimeCardMedia href={href} src={anime.coverImage} sizes="54px" size="mini" />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex items-start gap-1.5">
-          <h3
+      <AnimeCardBody layout="compact" className="gap-1">
+        <AnimeCardHeader className="gap-1.5">
+          <AnimeCardTitle
+            href={href}
+            size="sm"
+            stretched
             className={cn(
-              "line-clamp-2 flex-1 text-[13px] font-semibold leading-tight text-[var(--fr-ink)]",
+              "flex-1",
               needsAttention && "before:mr-1.5 before:inline-block before:h-1.5 before:w-1.5 before:rounded-full before:bg-current before:align-middle",
             )}
-            style={{ letterSpacing: "-0.01em" }}
             title={anime.title}
           >
-            <Link
-              href={animePath(anime.id, anime.title)}
-              className="after:absolute after:inset-0 after:z-0 focus-visible:outline-none"
-            >
-              {anime.title}
-            </Link>
-          </h3>
-          <div className="relative z-10 -mr-0.5 flex shrink-0 items-center">
+            {anime.title}
+          </AnimeCardTitle>
+          <AnimeCardActions className="-mr-0.5">
             <ExternalLinksMenu links={anime.externalLinks} />
             <FavoriteButton
               animeId={anime.id}
               className="h-6 w-6 bg-transparent text-[var(--fr-ink-muted)] hover:bg-transparent hover:text-[var(--fr-ink)]"
             />
-          </div>
-        </div>
+          </AnimeCardActions>
+        </AnimeCardHeader>
 
-        <p className="truncate text-[11px] text-[var(--fr-ink-muted)]">
-          {anime.studio}
-        </p>
+        <AnimeCardDescription className="mt-0">{anime.studio}</AnimeCardDescription>
 
         {/* Status line + monochrome season progress */}
         <div className="mt-auto space-y-1.5 pt-1.5">
-          <div className="flex items-center justify-between gap-2 text-[11px]">
+          <AnimeCardMeta className="justify-between">
             <span
               className={cn(
                 "tabular-nums",
@@ -149,7 +137,7 @@ export function AnimeCard({
             ) : !episodeIsPast && !episode ? (
               <span className="text-[var(--fr-ink-muted)]">Finale aired</span>
             ) : null}
-          </div>
+          </AnimeCardMeta>
 
           {needsAttention && (
             <p className="text-[11px] font-bold text-[var(--fr-ink)]">
@@ -168,7 +156,7 @@ export function AnimeCard({
             />
           </div>
         </div>
-      </div>
-    </article>
+      </AnimeCardBody>
+    </AnimeCardRoot>
   );
 }

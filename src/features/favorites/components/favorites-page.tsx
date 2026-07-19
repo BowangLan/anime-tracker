@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Compass, Radio, Search, Star } from "lucide-react";
 import type { AiringAnime } from "@/lib/anilist";
@@ -10,6 +9,18 @@ import { PageHeader } from "@/components/app-shell/page-header";
 import { FavoriteButton } from "@/features/dashboard/components/cards/favorite-button";
 import { Skeleton } from "@/components/common/skeleton";
 import { animePath } from "@/lib/site";
+import {
+  AnimeCard,
+  AnimeCardActions,
+  AnimeCardBody,
+  AnimeCardDescription,
+  AnimeCardHeader,
+  AnimeCardList,
+  AnimeCardMedia,
+  AnimeCardMeta,
+  AnimeCardStatus,
+  AnimeCardTitle,
+} from "@/components/anime/anime-card";
 
 export function FavoritesPage() {
   const following = useFollows((state) => state.following);
@@ -195,9 +206,9 @@ function FavoriteSection({
           {count}
         </span>
       </div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <AnimeCardList layout="panelGrid">
         {children}
-      </div>
+      </AnimeCardList>
     </section>
   );
 }
@@ -209,52 +220,31 @@ function FavoriteCard({
   anime: AiringAnime;
   airing?: boolean;
 }) {
+  const href = animePath(anime.id, anime.title);
+
   return (
-    <article className="group relative flex h-[152px] min-w-0 gap-3 overflow-hidden rounded-[13px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] p-2.5 transition-colors hover:border-white/20">
-      <Link
-        href={animePath(anime.id, anime.title)}
-        className="relative aspect-[2/3] h-full shrink-0 overflow-hidden rounded-[8px] bg-[var(--fr-surface-2)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)]/60"
-      >
-        {anime.coverImage && (
-          <Image
-            src={anime.coverImage}
-            alt=""
-            fill
-            sizes="88px"
-            className="object-cover transition duration-300 group-hover:scale-[1.025]"
-          />
-        )}
-      </Link>
-      <div className="flex min-w-0 flex-1 flex-col py-0.5">
-        <div className="flex items-start justify-between gap-2">
-          <span
-            className={
-              airing
-                ? "inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--fr-accent-blue)]"
-                : "text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--fr-ink-muted)]"
-            }
-          >
-            {airing && <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+    <AnimeCard layout="panel" surface="outlined">
+      <AnimeCardMedia href={href} src={anime.coverImage} sizes="88px" size="panel" />
+      <AnimeCardBody layout="panel">
+        <AnimeCardHeader>
+          <AnimeCardStatus tone={airing ? "live" : "muted"} dot={airing}>
             {airing ? "Airing" : "Saved"}
-          </span>
+          </AnimeCardStatus>
+          <AnimeCardActions>
           <FavoriteButton animeId={anime.id} className="-mr-1 -mt-1 shrink-0" />
-        </div>
-        <h3 className="mt-1 min-w-0 text-[14px] font-semibold leading-[1.25] tracking-[-0.02em]">
-          <Link
-            href={animePath(anime.id, anime.title)}
-            className="line-clamp-2 overflow-hidden break-words outline-none focus-visible:underline"
-          >
+          </AnimeCardActions>
+        </AnimeCardHeader>
+        <AnimeCardTitle href={href} size="default" className="mt-1 break-words">
             {anime.title}
-          </Link>
-        </h3>
-        <p className="mt-2 truncate text-[11px] text-[var(--fr-ink-muted)]">
+        </AnimeCardTitle>
+        <AnimeCardDescription className="mt-2">
           {anime.next
             ? `Episode ${anime.next.episode} next`
             : anime.totalEpisodes
               ? `${anime.totalEpisodes} episodes`
               : "Release information unavailable"}
-        </p>
-        <div className="mt-auto flex min-w-0 gap-1.5 overflow-hidden pt-2">
+        </AnimeCardDescription>
+        <AnimeCardMeta className="mt-auto gap-1.5 overflow-hidden pt-2">
           {anime.genres.slice(0, 2).map((genre) => (
             <span
               key={genre}
@@ -263,9 +253,9 @@ function FavoriteCard({
               {genre}
             </span>
           ))}
-        </div>
-      </div>
-    </article>
+        </AnimeCardMeta>
+      </AnimeCardBody>
+    </AnimeCard>
   );
 }
 

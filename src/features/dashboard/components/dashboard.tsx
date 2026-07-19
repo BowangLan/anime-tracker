@@ -14,8 +14,6 @@ import { AnimeCard } from "./cards/anime-card";
 import { SectionHeader } from "./sections/section-header";
 import { episodeOnLocalDate } from "@/lib/schedule";
 
-const TODAY_GRID_ROWS = 3;
-
 export function Dashboard({ anime }: { anime: AiringAnime[] }) {
   const now = useNow();
   const following = useFollows((s) => s.following);
@@ -46,12 +44,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
                 description={`${model.todayCount} scheduled ${model.todayCount === 1 ? "release" : "releases"}`}
               />
               {model.todayCount > 0 ? (
-                <div
-                  className="grid snap-x snap-mandatory grid-flow-col auto-cols-[minmax(280px,calc((100%-0.625rem)/2))] gap-2.5 overflow-x-auto overscroll-x-contain pb-2 [&>*]:snap-start"
-                  style={{
-                    gridTemplateRows: `repeat(${TODAY_GRID_ROWS}, minmax(0, 1fr))`,
-                  }}
-                >
+                <div className="grid grid-flow-col grid-rows-3 snap-x snap-mandatory auto-cols-[minmax(280px,calc((100%-0.625rem)/2))] gap-2.5 overflow-x-auto overscroll-x-contain pb-2 [&>*]:snap-start">
                   {(model.byDay.get(model.today) ?? []).map((entry) => (
                     <AnimeCard
                       key={entry.anime.id}
