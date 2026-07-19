@@ -11,22 +11,16 @@ export function SearchPage() {
 
   return (
     <main className="flex h-full min-h-0 flex-col overflow-hidden">
-      <PageHeader title="Search" description="Search the complete AniList catalog" headingLevel="div" />
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-8 sm:px-8 sm:py-12 lg:px-10">
-        <div className="mx-auto w-full max-w-3xl">
-          <div className="mb-8 sm:mb-10">
-            <p className="fr-eyebrow">AniList catalog</p>
-            <h1 className="mt-2 max-w-2xl text-[32px] font-semibold leading-[1.05] tracking-[-0.045em] text-[var(--fr-ink)] sm:text-[46px]">
-              Find the show you can&apos;t stop thinking about.
-            </h1>
-            <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-[var(--fr-ink-muted)] sm:text-[14px]">
-              Search by title, studio, or a keyword. Your recent searches stay on this device.
-            </p>
-          </div>
-
+      <PageHeader title="Search" description="Search the complete AniList catalog" />
+      <div className="shrink-0 border-b border-[var(--fr-hairline-soft)] px-4 py-3 sm:px-7">
+        <div className="max-w-2xl">
           <SearchForm autoFocus />
+        </div>
+      </div>
 
-          <section aria-labelledby="recent-searches-heading" className="mt-10 border-t border-[var(--fr-hairline-soft)] pt-6 sm:mt-14">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-5 sm:px-7 sm:py-6">
+        <div className="max-w-2xl">
+          <section aria-labelledby="recent-searches-heading">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <Clock3 className="h-4 w-4 text-[var(--fr-ink-muted)]" aria-hidden="true" />
@@ -58,7 +52,7 @@ export function SearchPage() {
             ) : (
               <div className="mt-4 rounded-[14px] border border-dashed border-[var(--fr-hairline)] px-5 py-8 text-center">
                 <p className="text-[13px] font-medium text-[var(--fr-ink)]">No recent searches</p>
-                <p className="mt-1 text-[12px] text-[var(--fr-ink-muted)]">Your searches will collect here for a quick return.</p>
+                <p className="mt-1 text-[12px] text-[var(--fr-ink-muted)]">Searches made on this device will appear here.</p>
               </div>
             )}
           </section>
