@@ -1,7 +1,7 @@
 import { AlertCircle, Radio } from "lucide-react";
 import type { AnimeSearchResult } from "@/lib/anilist";
-import type { SearchState } from "@/features/dashboard/hooks/use-anime-search";
-import { EmptyState } from "../empty-state";
+import type { SearchState } from "@/features/search/hooks/use-anime-search";
+import { EmptyState } from "@/features/dashboard/components/empty-state";
 import { SearchResultCard } from "./search-result-card";
 import { SearchResultsSkeleton } from "./search-results-skeleton";
 import { AnimeCardList } from "@/components/anime/anime-card";
@@ -24,18 +24,16 @@ export function SearchResults({
   const releasingCount = results.filter((anime) => anime.status === "RELEASING").length;
 
   return (
-    <section className="p-5" aria-live="polite" aria-busy={state === "loading"}>
+    <section aria-live="polite" aria-busy={state === "loading"}>
       <div className="mb-5 flex items-end justify-between gap-4 border-b border-[var(--fr-hairline-soft)] pb-4">
         <div className="min-w-0">
           <p className="fr-eyebrow">Search results</p>
-          <h2 className="mt-1 truncate text-[22px] font-semibold tracking-[-0.035em] text-[var(--fr-ink)]">
+          <h1 className="mt-1 truncate text-[22px] font-semibold tracking-[-0.035em] text-[var(--fr-ink)]">
             &ldquo;{query}&rdquo;
-          </h2>
+          </h1>
         </div>
         <p className="shrink-0 pb-0.5 text-[12px] tabular-nums text-[var(--fr-ink-muted)]">
-          {state === "loading"
-            ? "Searching AniList…"
-            : `${results.length} ${results.length === 1 ? "show" : "shows"}`}
+          {state === "loading" ? "Searching AniList…" : `${results.length} ${results.length === 1 ? "show" : "shows"}`}
         </p>
       </div>
 

@@ -7,12 +7,12 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Discover Current Anime",
   description:
-    "Explore trending, popular, upcoming, and overlooked anime from the current season, or search the complete AniList catalog.",
+    "Explore trending, popular, upcoming, and overlooked anime from the current season.",
   alternates: { canonical: "/discover" },
   openGraph: {
     title: "Discover Current Anime",
     description:
-      "Browse this season's currently airing anime and search the complete AniList catalog.",
+      "Browse this season's trending, popular, upcoming, and overlooked anime.",
     url: "/discover",
   },
 };

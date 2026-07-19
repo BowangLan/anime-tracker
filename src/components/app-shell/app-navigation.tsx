@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Compass, House, Star, Tv } from "lucide-react";
+import { CalendarDays, Compass, House, Search, Star, Tv } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFollows } from "@/stores/follows-store";
 
 const items = [
   { href: "/", label: "Home", icon: House },
   { href: "/favorites", label: "Favorites", icon: Star },
+  { href: "/search", label: "Search", icon: Search },
   { href: "/discover", label: "Discover", icon: Compass },
   { href: "/schedule", label: "Schedule", icon: CalendarDays },
 ];
@@ -66,7 +67,7 @@ export function AppNavigation() {
         </Link>
       </header>
 
-      <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-50 grid h-[68px] grid-cols-4 border-t border-[var(--fr-hairline)] bg-[var(--fr-surface-1)]/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-50 grid h-[68px] grid-cols-5 border-t border-[var(--fr-hairline)] bg-[var(--fr-surface-1)]/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
         {items.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;

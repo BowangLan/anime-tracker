@@ -8,7 +8,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const locksViewport =
     pathname === "/schedule" ||
     pathname === "/favorites" ||
-    pathname === "/discover";
+    pathname === "/discover" ||
+    pathname.startsWith("/search");
 
   return (
     <div
