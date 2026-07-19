@@ -37,14 +37,14 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
         <div className="flex min-w-0 flex-col gap-7 px-5 py-5 sm:px-8 lg:px-7 flex-1 min-h-0 overflow-y-auto">
           <Stats model={model} />
           <FavoritesSection anime={anime} following={following} now={now!} />
-          <div className="grid min-w-0 gap-7 xl:h-[440px] xl:grid-cols-[minmax(0,1fr)_320px] shrink-0">
+          <div className="grid min-w-0 shrink-0 gap-7 xl:h-[520px] xl:grid-cols-[minmax(0,1fr)_320px]">
             <section className="min-w-0 pr-1">
               <SectionHeader
                 title="Today"
                 description={`${model.todayCount} scheduled ${model.todayCount === 1 ? "release" : "releases"}`}
               />
               {model.todayCount > 0 ? (
-                <div className="grid grid-flow-col grid-rows-3 snap-x snap-mandatory auto-cols-[minmax(280px,calc((100%-0.625rem)/2))] gap-2.5 overflow-x-auto overscroll-x-contain pb-2 [&>*]:snap-start">
+                <div className="grid grid-flow-col grid-rows-3 snap-x snap-mandatory auto-cols-[minmax(340px,calc((100%-0.75rem)/2))] gap-3 overflow-x-auto overscroll-x-contain pb-2 [&>*]:snap-start">
                   {(model.byDay.get(model.today) ?? []).map((entry) => (
                     <AnimeCard
                       key={entry.anime.id}
@@ -52,6 +52,7 @@ export function Dashboard({ anime }: { anime: AiringAnime[] }) {
                       airing={entry.airing}
                       now={now!}
                       episode={episodeOnLocalDate(entry.anime.schedule, new Date(now!))}
+                      density="roomy"
                     />
                   ))}
                 </div>

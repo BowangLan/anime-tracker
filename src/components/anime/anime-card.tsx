@@ -10,6 +10,7 @@ const animeCardVariants = cva("group/anime-card relative min-w-0", {
     layout: {
       poster: "flex flex-col",
       compact: "flex min-h-32 items-start gap-3 p-2.5",
+      schedule: "flex h-[152px] items-stretch gap-3 p-2.5",
       panel: "flex h-[152px] gap-3 overflow-hidden p-2.5",
       row: "grid items-center gap-3",
     },
@@ -66,6 +67,7 @@ const animeCardMediaVariants = cva(
         feature: "aspect-[4/5] w-full rounded-[15px]",
         panel: "aspect-[2/3] h-full rounded-[8px]",
         compact: "aspect-[2/3] w-[70px] rounded-[8px]",
+        schedule: "aspect-[2/3] h-full rounded-[9px]",
         thumbnail: "aspect-[2/3] w-14 rounded-[8px]",
         mini: "aspect-[2/3] w-[54px] rounded-[8px]",
       },
@@ -128,6 +130,7 @@ const animeCardBodyVariants = cva("min-w-0", {
     layout: {
       poster: "pt-3",
       compact: "flex flex-1 self-stretch flex-col py-0.5",
+      schedule: "flex flex-1 flex-col py-0.5",
       panel: "flex flex-1 flex-col py-0.5",
       row: "",
     },

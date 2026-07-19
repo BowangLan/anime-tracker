@@ -34,11 +34,13 @@ export function AnimeCard({
   airing,
   now,
   episode,
+  density = "compact",
 }: {
   anime: AiringAnime;
   airing: Airing;
   now: number;
   episode: EpisodeAiring | null;
+  density?: "compact" | "roomy";
 }) {
   const total = anime.totalEpisodes;
   const countdown =
@@ -49,20 +51,26 @@ export function AnimeCard({
   const episodeIsPast = episode != null && episode.airingAt * 1000 <= now;
   const episodeWatched = episode != null && isWatched(episode.episode);
   const href = animePath(anime.id, anime.title);
+  const roomy = density === "roomy";
 
   return (
     <AnimeCardRoot
-      layout="compact"
+      layout={roomy ? "schedule" : "compact"}
       surface="outlined"
       emphasis={needsAttention ? "attention" : "default"}
     >
-      <AnimeCardMedia href={href} src={anime.coverImage} sizes="54px" size="mini" />
+      <AnimeCardMedia
+        href={href}
+        src={anime.coverImage}
+        sizes={roomy ? "88px" : "54px"}
+        size={roomy ? "schedule" : "mini"}
+      />
 
-      <AnimeCardBody layout="compact" className="gap-1">
+      <AnimeCardBody layout={roomy ? "schedule" : "compact"} className="gap-1">
         <AnimeCardHeader className="gap-1.5">
           <AnimeCardTitle
             href={href}
-            size="sm"
+            size={roomy ? "default" : "sm"}
             stretched
             className={cn(
               "flex-1",
@@ -76,7 +84,10 @@ export function AnimeCard({
             <ExternalLinksMenu links={anime.externalLinks} />
             <FavoriteButton
               animeId={anime.id}
-              className="h-6 w-6 bg-transparent text-[var(--fr-ink-muted)] hover:bg-transparent hover:text-[var(--fr-ink)]"
+              className={cn(
+                "bg-transparent text-[var(--fr-ink-muted)] hover:bg-transparent hover:text-[var(--fr-ink)]",
+                roomy ? "h-7 w-7" : "h-6 w-6",
+              )}
             />
           </AnimeCardActions>
         </AnimeCardHeader>
