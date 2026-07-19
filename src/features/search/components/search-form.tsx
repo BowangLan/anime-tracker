@@ -22,19 +22,19 @@ export function SearchForm({ initialQuery = "", autoFocus = false }: { initialQu
 
   return (
     <form onSubmit={submitSearch} role="search" className="relative">
-      <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--fr-ink-muted)]" aria-hidden="true" />
+      <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fr-ink-muted)]" aria-hidden="true" />
       <input
         value={query}
         onChange={(event) => setQuery(event.target.value.slice(0, 100))}
         placeholder="Search title, studio, or keyword"
         aria-label="Search anime titles"
         autoFocus={autoFocus}
-        className="h-14 w-full rounded-[14px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] pl-12 pr-14 text-[15px] outline-none transition placeholder:text-[var(--fr-ink-muted)] hover:border-white/15 focus:border-[var(--fr-accent-blue)]/60 focus:ring-4 focus:ring-[var(--fr-accent-blue)]/10 sm:h-16 sm:pr-36 sm:text-base"
+        className="h-11 w-full rounded-[11px] border border-[var(--fr-hairline)] bg-[var(--fr-surface-1)] pl-10 pr-12 text-[13px] outline-none transition placeholder:text-[var(--fr-ink-muted)] hover:border-white/15 focus:border-[var(--fr-accent-blue)]/60 focus:ring-4 focus:ring-[var(--fr-accent-blue)]/10 sm:h-12 sm:pr-32 sm:text-[14px]"
       />
       <button
         type="submit"
         disabled={!query.trim()}
-        className="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-[10px] bg-[var(--fr-ink)] text-[var(--fr-canvas)] outline-none transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)] sm:flex sm:w-auto sm:gap-2 sm:px-4 sm:text-[13px] sm:font-medium"
+        className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-[8px] bg-[var(--fr-ink)] text-[var(--fr-canvas)] outline-none transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-[var(--fr-accent-blue)] sm:flex sm:w-auto sm:gap-2 sm:px-3 sm:text-[12px] sm:font-medium"
       >
         <span className="hidden sm:inline">Search</span>
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
