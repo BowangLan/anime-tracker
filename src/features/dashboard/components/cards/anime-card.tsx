@@ -154,10 +154,22 @@ export function AnimeCard({
             ) : null}
           </AnimeCardMeta>
 
-          {needsAttention && (
-            <p className="text-[11px] font-bold text-[var(--fr-ink)]">
-              {unwatchedEpisodes.length}{" "}
-              {unwatchedEpisodes.length === 1 ? "episode" : "episodes"} to catch up
+          {(roomy || needsAttention) && (
+            <p
+              aria-hidden={!needsAttention}
+              className={cn(
+                "min-h-4 text-[11px] font-bold text-[var(--fr-ink)]",
+                !needsAttention && "invisible",
+              )}
+            >
+              {needsAttention ? (
+                <>
+                  {unwatchedEpisodes.length}{" "}
+                  {unwatchedEpisodes.length === 1 ? "episode" : "episodes"} to catch up
+                </>
+              ) : (
+                "Caught up"
+              )}
             </p>
           )}
 
