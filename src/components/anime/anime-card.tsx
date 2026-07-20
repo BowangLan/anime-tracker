@@ -29,7 +29,7 @@ const animeCardVariants = cva("group/anime-card relative min-w-0", {
     {
       surface: "outlined",
       emphasis: "attention",
-      className: "border-foreground/30 hover:border-foreground/60",
+      className: "",
     },
   ],
   defaultVariants: {
@@ -165,7 +165,7 @@ function AnimeCardHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const animeCardTitleVariants = cva(
-  "min-w-0 text-[var(--fr-ink)] transition-colors group-hover/anime-card:text-[var(--fr-ink-muted)]",
+  "min-w-0 text-[var(--fr-ink)] transition-colors",
   {
     variants: {
       size: {
