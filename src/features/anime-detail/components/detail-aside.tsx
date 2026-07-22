@@ -5,9 +5,11 @@ import { FactPanel } from "./fact-panel";
 export function DetailAside({
   anime,
   mainStudio,
+  aniwavesUrl,
 }: {
   anime: AnimeDetail;
   mainStudio?: string;
+  aniwavesUrl?: string;
 }) {
   const links = anime.externalLinks.filter((link) => !link.isDisabled);
 
@@ -39,6 +41,20 @@ export function DetailAside({
               </a>
             ))}
           </div>
+        </div>
+      )}
+
+      {aniwavesUrl && (
+        <div>
+          <p className="fr-eyebrow">Catalog sources</p>
+          <a
+            href={aniwavesUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 flex items-center justify-between rounded-[10px] border border-white/8 px-3 py-2.5 text-[11px] text-white/62 transition hover:border-white/20 hover:text-white"
+          >
+            <span>Aniwaves</span><ArrowUpRight className="h-3 w-3 shrink-0" />
+          </a>
         </div>
       )}
     </aside>

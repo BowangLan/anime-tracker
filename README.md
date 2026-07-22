@@ -7,6 +7,11 @@ one question at a glance: _what's dropping, and when?_
 The schedule is fetched live from the **AniList** GraphQL API (free, no key).
 The only thing stored locally is which shows you follow.
 
+An optional production-oriented Aniwaves metadata pipeline can populate a local
+SQLite catalog and link matching source records from AniList detail pages. See
+[`docs/ANIWAVES_PIPELINE.md`](docs/ANIWAVES_PIPELINE.md) for scope, authorization
+requirements, operation, persistence, and API details.
+
 For a dated product/technical audit and proposed roadmap, see
 [`docs/STATE_AND_DIRECTIONS.md`](docs/STATE_AND_DIRECTIONS.md).
 
@@ -17,6 +22,7 @@ For a dated product/technical audit and proposed roadmap, see
 - **zustand** with `persist` for followed-show ids
 - Design system from `getdesign`'s **Framer** profile — see `DESIGN.md`
 - Data: [AniList GraphQL API](https://anilist.co/graphql)
+- Optional catalog store: SQLite populated from public Aniwaves sitemaps
 
 ## Run it
 

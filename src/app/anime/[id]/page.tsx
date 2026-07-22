@@ -19,6 +19,7 @@ import { DetailAside } from "@/features/anime-detail/components/detail-aside";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { label } from "@/features/anime-detail/lib/format";
 import { animePath, animeSlug, SITE_NAME, SITE_URL } from "@/lib/site";
+import { findAnimeByTitles } from "@/lib/aniwaves/database";
 
 export const revalidate = 3600;
 
@@ -81,6 +82,10 @@ export default async function AnimeDetailPage({ params }: DetailPageProps) {
   const subtitle =
     anime.title.romaji !== title ? anime.title.romaji : anime.title.native;
   const mainStudio = anime.studios.edges.find((studio) => studio.isMain)?.node;
+  const aniwavesMatch = findAnimeByTitles(
+    [anime.title.english, anime.title.romaji, anime.title.native, anime.title.userPreferred, ...anime.synonyms],
+    anime.seasonYear ?? anime.startDate.year,
+  );
   const detailStyle = { "--detail-accent": accent } as CSSProperties;
   const canonicalUrl = new URL(`/anime/${canonicalSegment}`, SITE_URL).href;
   const description = plainText(anime.description);
@@ -202,7 +207,7 @@ export default async function AnimeDetailPage({ params }: DetailPageProps) {
             <Reviews anime={anime} />
           </div>
 
-          <DetailAside anime={anime} mainStudio={mainStudio?.name} />
+          <DetailAside anime={anime} mainStudio={mainStudio?.name} aniwavesUrl={aniwavesMatch?.url} />
         </div>
       </div>
     </main>
